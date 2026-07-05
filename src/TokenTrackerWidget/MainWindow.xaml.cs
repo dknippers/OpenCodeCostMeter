@@ -82,7 +82,7 @@ public partial class MainWindow : Window
         menu.Items.Add(onTop);
 
         menu.Items.Add(MakeHeader("Poll interval"));
-        foreach (var s in new[] { 2.0, 4.0, 8.0, 16.0, 32.0 })
+        foreach (var s in new[] { 5.0, 10.0, 30.0, 60.0 })
         {
             var item = new System.Windows.Controls.MenuItem
             {
