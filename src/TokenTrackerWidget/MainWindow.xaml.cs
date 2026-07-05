@@ -1,7 +1,5 @@
-﻿using System.IO;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
-using TokenTrackerWidget.Data;
 using TokenTrackerWidget.Models;
 using TokenTrackerWidget.ViewModels;
 
@@ -86,7 +84,7 @@ public partial class MainWindow : Window
         {
             var item = new System.Windows.Controls.MenuItem
             {
-                Header = $"{s} s",
+                Header = $"{s} seconds",
                 IsCheckable = true,
                 IsChecked = Math.Abs(_settings.PollIntervalSeconds - s) < 0.01
             };
