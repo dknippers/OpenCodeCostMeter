@@ -103,12 +103,12 @@
                            HorizontalAlignment="Center"/>
 
                 <!-- Breakdown List -->
-                <Border x:Name="BreakdownContainer" ClipToBounds="True" Visibility="Collapsed" MaxHeight="0" Opacity="0" Padding="0,12,0,0">
+                <Border x:Name="BreakdownContainer" ClipToBounds="True" Visibility="Collapsed" MaxHeight="0" Opacity="0" Padding="0">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsBreakdownExpanded}" Value="True">
-                                    <DataTrigger.EnterActions>
+                                     <DataTrigger.EnterActions>
                                         <BeginStoryboard>
                                             <Storyboard>
                                                 <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
@@ -119,14 +119,13 @@
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </DataTrigger.EnterActions>
-                                    <DataTrigger.ExitActions>
+                                     <DataTrigger.ExitActions>
                                         <BeginStoryboard>
                                             <Storyboard>
                                                 <DoubleAnimation Storyboard.TargetProperty="MaxHeight" To="0" Duration="0:0:0.25" EasingFunction="{StaticResource EaseOut}"/>
                                                 <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2" EasingFunction="{StaticResource EaseOut}"/>
                                                 <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
                                                     <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:0.25" Value="{x:Static Visibility.Collapsed}"/>
                                                 </ObjectAnimationUsingKeyFrames>
                                             </Storyboard>
                                         </BeginStoryboard>
@@ -135,7 +134,7 @@
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <ItemsControl ItemsSource="{Binding ModelRows}">
+                    <ItemsControl ItemsSource="{Binding ModelRows}" Margin="0,12,0,0" Visibility="{Binding IsBreakdownExpanded, Converter={StaticResource BoolToVis}}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:ModelRowViewModel}">
                                 <Border CornerRadius="8" Padding="8,6" Margin="0,1"
