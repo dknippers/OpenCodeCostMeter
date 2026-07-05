@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Windows.Threading;
 using OpenCodeCostMeter.Models;
 using OpenCodeCostMeter.Services;
 
@@ -10,6 +11,7 @@ namespace OpenCodeCostMeter.ViewModels;
 public partial class WidgetViewModel : ObservableObject, IDisposable
 {
     private readonly UsagePoller _poller;
+    private readonly DispatcherTimer _highlightTimer;
     private bool _disposed;
 
     public WidgetViewModel(UsagePoller poller)
@@ -17,6 +19,22 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
         _poller = poller;
         _poller.Updated += OnUpdated;
         _poller.Error += OnError;
+
+        _highlightTimer = new DispatcherTimer(DispatcherPriority.Background)
+        {
+            Interval = TimeSpan.FromSeconds(2.0)
+        };
+        _highlightTimer.Tick += OnHighlightTimerTick;
+    }
+
+    private void OnHighlightTimerTick(object? sender, EventArgs e)
+    {
+        _highlightTimer.Stop();
+        IsTodayCostHighlighted = false;
+        foreach (var row in ModelRows)
+        {
+            row.IsCostHighlighted = false;
+        }
     }
 
     [ObservableProperty] private string _todayCostText = "$0.00";
@@ -46,15 +64,13 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     private void OnUpdated(object? sender, DayUsageSnapshot snap)
     {
         var costText = snap.Cost.ToString("C2", CultureInfo.GetCultureInfo("en-US"));
-        if (_isFirstUpdate)
+        bool anyHighlight = false;
+        if (!_isFirstUpdate && costText != _lastCostText)
         {
-            IsTodayCostHighlighted = false;
-            _isFirstUpdate = false;
+            IsTodayCostHighlighted = true;
+            anyHighlight = true;
         }
-        else
-        {
-            IsTodayCostHighlighted = costText != _lastCostText;
-        }
+        _isFirstUpdate = false;
         _lastCostText = costText;
         TodayCostText = costText;
 
@@ -78,7 +94,14 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
             {
                 IsCostHighlighted = highlightedModels.Contains(ModelKey(b))
             };
+            if (row.IsCostHighlighted) anyHighlight = true;
             ModelRows.Add(row);
+        }
+
+        if (anyHighlight)
+        {
+            _highlightTimer.Stop();
+            _highlightTimer.Start();
         }
 
         _lastModelCostTexts.Clear();
@@ -113,6 +136,8 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     {
         if (_disposed) return;
         _disposed = true;
+        _highlightTimer.Stop();
+        _highlightTimer.Tick -= OnHighlightTimerTick;
         Detach();
     }
 }
