@@ -61,15 +61,12 @@ public partial class MainWindow : Window
         ViewModel.ForceNow();
     }
 
-    private void OnCloseClicked(object sender, RoutedEventArgs e)
-        => Close();
-
-    private void OnSettingsClicked(object sender, RoutedEventArgs e)
+    private void OnCardMouseRightButtonUp(object sender, MouseButtonEventArgs e)
     {
         var menu = BuildMenu();
-        menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
-        menu.PlacementTarget = (UIElement)sender;
+        menu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
         menu.IsOpen = true;
+        e.Handled = true;
     }
 
     private System.Windows.Controls.ContextMenu BuildMenu()
@@ -134,6 +131,10 @@ public partial class MainWindow : Window
         }
 
         menu.Items.Add(new System.Windows.Controls.Separator());
+
+        var quit = new System.Windows.Controls.MenuItem { Header = "Quit" };
+        quit.Click += (_, _) => Close();
+        menu.Items.Add(quit);
 
         return menu;
     }
