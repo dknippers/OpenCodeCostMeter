@@ -1,4 +1,4 @@
-# OpenCodeCostMeter
+# OpenCode Cost Meter
 
 A small borderless Windows 11 desktop widget that shows today's OpenCode LLM
 spend in real time-ish, broken down by model.
@@ -77,7 +77,3 @@ src/
 ├─ ModelColorResolver.cs            # provider/model → accent color
 └─ FormatUtil.cs                    # number/currency formatting
 ```
-
-## License
-
-Personal project — no license granted beyond what the repository history implies.
