@@ -65,8 +65,6 @@ public partial class App : Application
             _window.Left = _settings.X;
             _window.Top = _settings.Y;
         }
-        if (_settings.Width > 0) _window.Width = _settings.Width;
-        // Height auto-fits to content (SizeToContent="Height" in XAML); do not restore.
         _window.Topmost = _settings.AlwaysOnTop;
         _window.Opacity = Math.Clamp(_settings.Opacity, 0.4, 1.0);
         _window.Show();
@@ -87,8 +85,6 @@ public partial class App : Application
         {
             _settings.X = _window.Left;
             _settings.Y = _window.Top;
-            _settings.Width = _window.ActualWidth;
-            // Height auto-fits; not persisted.
             _store.Save(_settings);
             _vm.Dispose();
             _poller.Dispose();
