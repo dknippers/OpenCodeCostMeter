@@ -1,12 +1,12 @@
-﻿using System.IO;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
-using TokenTrackerWidget.Data;
-using TokenTrackerWidget.Models;
-using TokenTrackerWidget.Services;
-using TokenTrackerWidget.ViewModels;
+using OpenCodeCostMeter.Data;
+using OpenCodeCostMeter.Models;
+using OpenCodeCostMeter.Services;
+using OpenCodeCostMeter.ViewModels;
 
-namespace TokenTrackerWidget;
+namespace OpenCodeCostMeter;
 
 public partial class App : Application
 {
@@ -135,9 +135,9 @@ public partial class App : Application
 
         Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
 
-        Console.WriteLine("OpenCode Token Tracker");
+        Console.WriteLine("OpenCode Cost Meter");
         Console.WriteLine();
-        Console.WriteLine("Usage: TokenTrackerWidget.exe [--db-path <path>] [--help]");
+        Console.WriteLine("Usage: OpenCodeCostMeter.exe [--db-path <path>] [--help]");
         Console.WriteLine();
         Console.WriteLine("Options:");
         Console.WriteLine("  --db-path <path>  Use an alternative opencode.db location.");
@@ -152,7 +152,7 @@ public partial class App : Application
             ? $"Database not found: {commandLinePath}"
             : $"Could not find the opencode database at{Environment.NewLine}{DbLocator.DefaultPath()}{Environment.NewLine}{Environment.NewLine}Use --db-path <path> to specify an alternative location.";
 
-        MessageBox.Show(message, "OpenCode Token Tracker",
+        MessageBox.Show(message, "OpenCode Cost Meter",
             MessageBoxButton.OK, MessageBoxImage.Error);
     }
 

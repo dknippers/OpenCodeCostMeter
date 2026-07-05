@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace TokenTrackerWidget.Data;
+namespace OpenCodeCostMeter.Data;
 
 public static class DbLocator
 {

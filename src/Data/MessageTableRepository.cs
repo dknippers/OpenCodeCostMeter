@@ -1,7 +1,7 @@
 using Microsoft.Data.Sqlite;
-using TokenTrackerWidget.Models;
+using OpenCodeCostMeter.Models;
 
-namespace TokenTrackerWidget.Data;
+namespace OpenCodeCostMeter.Data;
 
 public sealed class MessageTableRepository : IUsageRepository
 {

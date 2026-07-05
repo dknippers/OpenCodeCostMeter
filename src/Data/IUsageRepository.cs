@@ -1,6 +1,6 @@
-using TokenTrackerWidget.Models;
+using OpenCodeCostMeter.Models;
 
-namespace TokenTrackerWidget.Data;
+namespace OpenCodeCostMeter.Data;
 
 public interface IUsageRepository
 {

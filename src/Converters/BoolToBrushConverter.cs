@@ -1,7 +1,7 @@
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace TokenTrackerWidget.Converters;
+namespace OpenCodeCostMeter.Converters;
 
 public sealed class BoolToBrushConverter : IValueConverter
 {

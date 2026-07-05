@@ -1,4 +1,4 @@
-namespace TokenTrackerWidget.Models;
+namespace OpenCodeCostMeter.Models;
 
 public sealed record ModelBreakdown(
     string Provider,

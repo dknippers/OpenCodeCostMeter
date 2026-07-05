@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace TokenTrackerWidget.Converters;
+namespace OpenCodeCostMeter.Converters;
 
 public sealed class BoolToDoubleConverter : IValueConverter
 {

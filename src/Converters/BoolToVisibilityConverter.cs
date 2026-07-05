@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace TokenTrackerWidget.Converters;
+namespace OpenCodeCostMeter.Converters;
 
 public sealed class BoolToVisibilityConverter : IValueConverter
 {

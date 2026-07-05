@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-TokenTracker is a Windows 11 desktop widget that displays today's OpenCode LLM spend in real-time, broken down by model. It reads the opencode SQLite database directly (read-only) and refreshes every few seconds.
+OpenCodeCostMeter is a Windows 11 desktop widget that displays today's OpenCode LLM spend in real-time, broken down by model. It reads the opencode SQLite database directly (read-only) and refreshes every few seconds.
 
 ## Tech Stack
 
@@ -51,10 +51,10 @@ Key details about the schema:
 ## Building
 
 ```powershell
-dotnet build src\TokenTrackerWidget\TokenTrackerWidget.csproj
+dotnet build src\OpenCodeCostMeter.csproj
 ```
 
-Output: `src\TokenTrackerWidget\bin\Debug\net10.0-windows\TokenTrackerWidget.exe`
+Output: `src\bin\Debug\net10.0-windows\OpenCodeCostMeter.exe`
 
 ## Command-line options
 
@@ -63,12 +63,12 @@ Output: `src\TokenTrackerWidget\bin\Debug\net10.0-windows\TokenTrackerWidget.exe
 
 ## Settings
 
-Settings file: `TokenTrackerWidget.settings.json` next to the exe. Delete to reset defaults.
+Settings file: `OpenCodeCostMeter.settings.json` next to the exe. Delete to reset defaults.
 
 ## Project Structure
 
 ```
-src/TokenTrackerWidget/
+src/
 ├─ Data/                         # Database access
 ├─ Models/                       # Data models
 ├─ Services/                     # Polling and settings persistence
@@ -77,6 +77,6 @@ src/TokenTrackerWidget/
 ├─ ModelColorResolver.cs         # Provider/model → accent color
 ├─ FormatUtil.cs                 # Number/currency formatting
 ├─ MainWindow.xaml/.cs           # Borderless topmost widget window
-├─ App.xaml/.cs                  # Application bootstrap
-└─ TokenTrackerWidget.csproj     # Project file
+├─ App.xaml/.cs                   # Application bootstrap
+└─ OpenCodeCostMeter.csproj      # Project file
 ```

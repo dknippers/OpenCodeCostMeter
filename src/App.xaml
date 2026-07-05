@@ -1,7 +1,7 @@
-﻿<Application x:Class="TokenTrackerWidget.App"
+<Application x:Class="OpenCodeCostMeter.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:TokenTrackerWidget"
+             xmlns:local="clr-namespace:OpenCodeCostMeter"
              ShutdownMode="OnMainWindowClose">
     <Application.Resources>
          

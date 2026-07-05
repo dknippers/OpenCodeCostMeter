@@ -1,8 +1,8 @@
 using System.Windows.Threading;
-using TokenTrackerWidget.Data;
-using TokenTrackerWidget.Models;
+using OpenCodeCostMeter.Data;
+using OpenCodeCostMeter.Models;
 
-namespace TokenTrackerWidget.Services;
+namespace OpenCodeCostMeter.Services;
 
 public sealed class UsagePoller : IDisposable
 {

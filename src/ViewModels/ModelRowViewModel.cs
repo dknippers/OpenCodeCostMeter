@@ -1,8 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Globalization;
-using TokenTrackerWidget.Models;
+using OpenCodeCostMeter.Models;
 
-namespace TokenTrackerWidget.ViewModels;
+namespace OpenCodeCostMeter.ViewModels;
 
 public partial class ModelRowViewModel : ObservableObject
 {

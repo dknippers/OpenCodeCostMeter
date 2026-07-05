@@ -2,10 +2,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using TokenTrackerWidget.Models;
-using TokenTrackerWidget.Services;
+using OpenCodeCostMeter.Models;
+using OpenCodeCostMeter.Services;
 
-namespace TokenTrackerWidget.ViewModels;
+namespace OpenCodeCostMeter.ViewModels;
 
 public partial class WidgetViewModel : ObservableObject, IDisposable
 {

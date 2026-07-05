@@ -1,4 +1,4 @@
-# TokenTracker
+# OpenCodeCostMeter
 
 A small borderless Windows 11 desktop widget that shows today's OpenCode LLM
 spend in real time-ish, broken down by model.
@@ -44,20 +44,20 @@ full rationale and schema analysis.
 Requires .NET 10.
 
 ```powershell
-dotnet build src\TokenTrackerWidget\TokenTrackerWidget.csproj
-.\src\TokenTrackerWidget\bin\Debug\net10.0-windows\TokenTrackerWidget.exe
+dotnet build src\OpenCodeCostMeter.csproj
+.\src\bin\Debug\net10.0-windows\OpenCodeCostMeter.exe
 ```
 
 ## Settings
 
-A `TokenTrackerWidget.settings.json` file is written next to the exe and stores
+A `OpenCodeCostMeter.settings.json` file is written next to the exe and stores
 window position/width, opacity, polling interval, and the always-on-top flag.
 Delete it to reset to defaults.
 
 ## Project layout
 
 ```
-src/TokenTrackerWidget/
+src/
 ├─ App.xaml / App.xaml.cs           # bootstraps MainWindow and locates DB
 ├─ MainWindow.xaml / .xaml.cs       # borderless topmost widget + context menu
 ├─ Models/

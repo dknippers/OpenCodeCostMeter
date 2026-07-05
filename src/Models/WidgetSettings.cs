@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace TokenTrackerWidget.Models;
+namespace OpenCodeCostMeter.Models;
 
 public sealed class WidgetSettings
 {

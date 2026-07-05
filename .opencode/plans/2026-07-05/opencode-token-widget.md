@@ -152,8 +152,8 @@ opencode writes to the DB from another process.
 ## 2. Architecture
 
 ```
-TokenTrackerWidget/
-├─ TokenTrackerWidget.csproj
+src/
+├─ OpenCodeCostMeter.csproj
 ├─ App.xaml / App.xaml.cs
 ├─ MainWindow.xaml / MainWindow.xaml.cs
 ├─ Models/
@@ -247,7 +247,7 @@ Common chrome:
 - About
 - Quit
 
-### 2.5 Persisted settings (JSON next to exe: `TokenTrackerWidget.settings.json`)
+### 2.5 Persisted settings (JSON next to exe: `OpenCodeCostMeter.settings.json`)
 
 ```json
 {
@@ -293,7 +293,7 @@ The per-model breakdown is already held in `ViewModel` memory between ticks (as 
 
 ## 3. Implementation steps (ordered)
 
-1. **Scaffold solution** — `dotnet new wpf -n TokenTrackerWidget -f net10.0` in repo root. Add NuGet: `Microsoft.Data.Sqlite`, `CommunityToolkit.Mvvm`. Confirm `dotnet msbuild /t:Compile` succeeds.
+1. **Scaffold solution** — `dotnet new wpf -n OpenCodeCostMeter -f net10.0` in `src/`. Add NuGet: `Microsoft.Data.Sqlite`, `CommunityToolkit.Mvvm`. Confirm `dotnet msbuild /t:Compile` succeeds.
 2. **Models** — `DayUsageSnapshot` (today's `DayKey`, totals for in/out/reason/cacheRead/cacheWrite/cost, `Calls` count, `List<ModelBreakdown> ModelBreakdowns`, plus `ActiveSessionTitle/Model/IsLive`), `WidgetSettings`. Pure DTOs.
 3. **Repository** — `MessageTableRepository.GetTodayAsync(startOfTodayMs)` runs the two §1.4 queries + the active-session metadata query, returns `DayUsageSnapshot`. Read-only connection string, reuse one connection, `Default Timeout=2`.
 4. **SanityChecker (diagnostic only)** — `SessionTableSanityChecker.CrossCheckTodayAsync(startOfTodayMs)` returns the diff between today-flagged sessions' cumulative token totals and the message-table today total. Used only by the context-menu action; surfaces drift, never alters displayed values.

@@ -1,9 +1,9 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Input;
-using TokenTrackerWidget.Models;
-using TokenTrackerWidget.ViewModels;
+using OpenCodeCostMeter.Models;
+using OpenCodeCostMeter.ViewModels;
 
-namespace TokenTrackerWidget;
+namespace OpenCodeCostMeter;
 
 public partial class MainWindow : Window
 {

@@ -1,9 +1,9 @@
 using System.IO;
 using System.Text;
 using System.Text.Json;
-using TokenTrackerWidget.Models;
+using OpenCodeCostMeter.Models;
 
-namespace TokenTrackerWidget.Services;
+namespace OpenCodeCostMeter.Services;
 
 public sealed class SettingsStore
 {
@@ -23,7 +23,7 @@ public sealed class SettingsStore
     public static string DefaultPath()
     {
         var dir = AppContext.BaseDirectory;
-        return Path.Combine(dir, "TokenTrackerWidget.settings.json");
+        return Path.Combine(dir, "OpenCodeCostMeter.settings.json");
     }
 
     public WidgetSettings Load()

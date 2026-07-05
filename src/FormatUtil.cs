@@ -1,4 +1,4 @@
-namespace TokenTrackerWidget;
+namespace OpenCodeCostMeter;
 
 public static class FormatUtil
 {
