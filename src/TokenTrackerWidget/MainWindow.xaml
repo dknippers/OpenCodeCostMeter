@@ -96,17 +96,12 @@
         <StackPanel Margin="16,14">
 
                 <!-- Primary Spend Card -->
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                     <TextBlock Text="{Binding TodayCostText}" FontFamily="{StaticResource UiFont}" FontSize="32" FontWeight="Bold"
-                               Foreground="{StaticResource OnSurface}"/>
-                    <StackPanel Orientation="Horizontal" Margin="8,0,0,6" VerticalAlignment="Center"
-                                Visibility="{Binding HasDelta, Converter={StaticResource BoolToVis}}">
-                        <Path Width="14" Height="14" Stretch="Uniform" Margin="0,0,3,0"
-                              Data="M10 4l5 5h-3v6h-4V9H5z"
-                              Fill="{StaticResource Secondary}"/>
-                        <TextBlock Text="{Binding TodayCostDeltaText}" FontFamily="{StaticResource MonoFont}" FontSize="11"
-                                   Foreground="{StaticResource Secondary}"/>
-                    </StackPanel>
+                               Foreground="{StaticResource OnSurface}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding TodayCostDeltaText}" FontFamily="{StaticResource MonoFont}" FontSize="11"
+                               Foreground="{StaticResource Secondary}" HorizontalAlignment="Center"
+                               Visibility="{Binding HasDelta, Converter={StaticResource BoolToVis}}"/>
                 </StackPanel>
 
                 <!-- Breakdown List -->
