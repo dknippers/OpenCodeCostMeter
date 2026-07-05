@@ -72,9 +72,6 @@ public partial class MainWindow : Window
     private System.Windows.Controls.ContextMenu BuildMenu()
     {
         var menu = new System.Windows.Controls.ContextMenu();
-        menu.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x20, 0x20, 0x1F));
-        menu.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x20, 0xFF, 0xFF, 0xFF));
-        menu.Foreground = FindResource("OnSurface") as System.Windows.Media.Brush;
 
         var onTop = new System.Windows.Controls.MenuItem
         {
