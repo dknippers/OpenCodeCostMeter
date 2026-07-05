@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using TokenTrackerWidget.Models;
 using TokenTrackerWidget.Services;
 
@@ -26,6 +27,14 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _callsText = "0 calls";
     [ObservableProperty] private bool _isRetrying;
     [ObservableProperty] private string _lastErrorText = "";
+    [ObservableProperty] private bool _isBreakdownExpanded;
+
+    public string BreakdownToggleText => IsBreakdownExpanded ? "Show Less" : "Usage Details";
+
+    partial void OnIsBreakdownExpandedChanged(bool value) => OnPropertyChanged(nameof(BreakdownToggleText));
+
+    [RelayCommand]
+    private void ToggleBreakdown() => IsBreakdownExpanded = !IsBreakdownExpanded;
 
     private double _lastCost = 0.0;
 
