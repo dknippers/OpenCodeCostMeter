@@ -105,7 +105,7 @@
                 </StackPanel>
 
                 <!-- Breakdown List -->
-                <Border x:Name="BreakdownContainer" ClipToBounds="True" Visibility="Collapsed" MaxHeight="0" Opacity="0" Margin="0,12,0,0">
+                <Border x:Name="BreakdownContainer" ClipToBounds="True" Visibility="Collapsed" MaxHeight="0" Opacity="0" Padding="0,12,0,0">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Style.Triggers>
