@@ -61,6 +61,16 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
+    private void OnCardMouseEnter(object sender, MouseEventArgs e)
+    {
+        ToggleButton.Visibility = Visibility.Visible;
+    }
+
+    private void OnCardMouseLeave(object sender, MouseEventArgs e)
+    {
+        ToggleButton.Visibility = Visibility.Collapsed;
+    }
+
     private System.Windows.Controls.ContextMenu BuildMenu()
     {
         var menu = new System.Windows.Controls.ContextMenu();
