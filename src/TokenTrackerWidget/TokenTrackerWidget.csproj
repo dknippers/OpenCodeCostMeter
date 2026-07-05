@@ -7,6 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <NoWarn>$(NoWarn);NU1903</NoWarn>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
