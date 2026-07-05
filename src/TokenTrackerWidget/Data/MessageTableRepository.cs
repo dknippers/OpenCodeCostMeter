@@ -35,7 +35,8 @@ WHERE json_extract(data, '$.role') = 'assistant'
   AND CAST(json_extract(data, '$.time.completed') AS INTEGER) >= @start
 GROUP BY COALESCE(json_extract(data, '$.providerID'), ''),
          COALESCE(json_extract(data, '$.modelID'), '')
-ORDER BY SUM(json_extract(data, '$.cost')) DESC;";
+ORDER BY SUM(json_extract(data, '$.cost')) DESC,
+         COALESCE(json_extract(data, '$.modelID'), '') ASC;";
 
     private const string ActiveSessionSql = @"
 SELECT title, model, time_updated
