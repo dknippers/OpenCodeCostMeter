@@ -43,10 +43,7 @@ public partial class App : Application
 
         var repo = new MessageTableRepository(dbPath);
         _poller = new UsagePoller(repo, _settings.PollIntervalSeconds);
-        _vm = new WidgetViewModel(_poller)
-        {
-            DisplayMode = _settings.DisplayMode
-        };
+        _vm = new WidgetViewModel(_poller);
 
         _window = new MainWindow
         {
@@ -69,7 +66,7 @@ public partial class App : Application
             _window.Top = _settings.Y;
         }
         if (_settings.Width > 0) _window.Width = _settings.Width;
-        if (_settings.Height > 0) _window.Height = _settings.Height;
+        // Height auto-fits to content (SizeToContent="Height" in XAML); do not restore.
         _window.Topmost = _settings.AlwaysOnTop;
         _window.Opacity = Math.Clamp(_settings.Opacity, 0.4, 1.0);
         _window.Show();
@@ -78,7 +75,6 @@ public partial class App : Application
     private void OnSettingsChanged(object? sender, EventArgs e)
     {
         _settings = ((MainWindow)sender!).Settings;
-        _vm.DisplayMode = _settings.DisplayMode;
         _poller.SetInterval(_settings.PollIntervalSeconds);
         _window.Topmost = _settings.AlwaysOnTop;
         _window.Opacity = Math.Clamp(_settings.Opacity, 0.4, 1.0);
@@ -93,8 +89,7 @@ public partial class App : Application
             _settings.X = _window.Left;
             _settings.Y = _window.Top;
             _settings.Width = _window.ActualWidth;
-            _settings.Height = _window.ActualHeight;
-            _settings.DisplayMode = _vm.DisplayMode;
+            // Height auto-fits; not persisted.
             _store.Save(_settings);
             _vm.Dispose();
             _poller.Dispose();

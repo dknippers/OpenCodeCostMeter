@@ -12,9 +12,8 @@ public sealed class WidgetSettings
     [JsonPropertyName("width")] public double Width { get; set; } = DefaultWidth;
     [JsonPropertyName("height")] public double Height { get; set; } = DefaultHeight;
     [JsonPropertyName("alwaysOnTop")] public bool AlwaysOnTop { get; set; } = true;
-    [JsonPropertyName("pollIntervalSeconds")] public double PollIntervalSeconds { get; set; } = 2.5;
-    [JsonPropertyName("opacity")] public double Opacity { get; set; } = 0.88;
-    [JsonPropertyName("displayMode")] public DisplayMode DisplayMode { get; set; } = DisplayMode.Tokens;
+    [JsonPropertyName("pollIntervalSeconds")] public double PollIntervalSeconds { get; set; } = 4.0;
+    [JsonPropertyName("opacity")] public double Opacity { get; set; } = 1.0;
     [JsonPropertyName("collapsed")] public bool Collapsed { get; set; } = false;
     [JsonPropertyName("runAtStartup")] public bool RunAtStartup { get; set; } = false;
     [JsonPropertyName("dbPathOverride")] public string? DatabasePathOverride { get; set; }
