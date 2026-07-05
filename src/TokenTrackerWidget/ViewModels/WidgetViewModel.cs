@@ -71,10 +71,11 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
         CallsText = $"{snap.Calls} {(snap.Calls == 1 ? "call" : "calls")}";
 
         var highlightedModels = new HashSet<string>();
+        var canHighlightModels = _lastModelCosts.Count > 0;
         foreach (var b in snap.Models)
         {
             var key = ModelKey(b);
-            if (b.Cost - _lastModelCosts.GetValueOrDefault(key) >= 0.01)
+            if (canHighlightModels && b.Cost - _lastModelCosts.GetValueOrDefault(key) >= 0.01)
             {
                 highlightedModels.Add(key);
             }
