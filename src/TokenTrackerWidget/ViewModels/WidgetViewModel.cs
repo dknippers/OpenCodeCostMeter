@@ -29,7 +29,7 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _lastErrorText = "";
     [ObservableProperty] private bool _isBreakdownExpanded;
 
-    public string BreakdownToggleText => IsBreakdownExpanded ? "Show Less" : "Usage Details";
+    public string BreakdownToggleText => IsBreakdownExpanded ? "hide" : "details";
 
     partial void OnIsBreakdownExpandedChanged(bool value) => OnPropertyChanged(nameof(BreakdownToggleText));
 
