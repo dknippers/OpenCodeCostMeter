@@ -24,6 +24,7 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isRetrying;
     [ObservableProperty] private string _lastErrorText = "";
     [ObservableProperty] private bool _isBreakdownExpanded;
+    [ObservableProperty] private bool _hasModels;
 
     public string BreakdownToggleText => IsBreakdownExpanded ? "less" : "more";
 
@@ -86,6 +87,7 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
             _lastModelCostTexts[ModelKey(b)] = b.Cost.ToString("C2", CultureInfo.GetCultureInfo("en-US"));
         }
 
+        HasModels = ModelRows.Count > 0;
         IsRetrying = false;
         LastErrorText = string.Empty;
     }
