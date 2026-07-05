@@ -37,6 +37,7 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     private void ToggleBreakdown() => IsBreakdownExpanded = !IsBreakdownExpanded;
 
     private double _lastCost = 0.0;
+    private bool _isFirstUpdate = true;
 
     public ObservableCollection<ModelRowViewModel> ModelRows { get; } = new();
 
@@ -54,16 +55,25 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
         IsLive = snap.IsLive;
 
         var cost = snap.Cost;
-        var delta = cost - _lastCost;
-        if (Math.Abs(delta) > 0.0001)
-        {
-            TodayCostDeltaText = (delta > 0 ? "+" : "") + delta.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
-            HasDelta = true;
-        }
-        else
+        if (_isFirstUpdate)
         {
             TodayCostDeltaText = string.Empty;
             HasDelta = false;
+            _isFirstUpdate = false;
+        }
+        else
+        {
+            var delta = cost - _lastCost;
+            if (Math.Abs(delta) > 0.0001)
+            {
+                TodayCostDeltaText = (delta > 0 ? "+" : "") + delta.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+                HasDelta = true;
+            }
+            else
+            {
+                TodayCostDeltaText = string.Empty;
+                HasDelta = false;
+            }
         }
         _lastCost = cost;
         TodayCostText = cost.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
