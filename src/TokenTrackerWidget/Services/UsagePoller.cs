@@ -8,7 +8,6 @@ public sealed class UsagePoller : IDisposable
 {
     private readonly IUsageRepository _repo;
     private readonly DispatcherTimer _timer;
-    private DayUsageSnapshot? _last;
     private bool _running;
     private bool _disposed;
 
@@ -22,8 +21,6 @@ public sealed class UsagePoller : IDisposable
         _timer.Tick += OnTick;
     }
 
-    public DayUsageSnapshot? LastSnapshot => _last;
-
     public event EventHandler<DayUsageSnapshot>? Updated;
     public event EventHandler<Exception>? Error;
 
@@ -33,13 +30,6 @@ public sealed class UsagePoller : IDisposable
         _running = true;
         _timer.Start();
         _ = OnTickAsync();
-    }
-
-    public void Stop()
-    {
-        if (!_running) return;
-        _running = false;
-        _timer.Stop();
     }
 
     public void SetInterval(double seconds)
@@ -63,7 +53,6 @@ public sealed class UsagePoller : IDisposable
         try
         {
             var snap = await Task.Run(() => _repo.GetToday(start));
-            _last = snap;
             Updated?.Invoke(this, snap);
         }
         catch (Exception ex)

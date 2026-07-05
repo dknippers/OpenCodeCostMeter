@@ -6,9 +6,4 @@ public sealed record ModelBreakdown(
     double Cost,
     long Input,
     long Output,
-    long CacheRead)
-{
-    public string Header => string.IsNullOrEmpty(Provider)
-        ? Model
-        : $"{Model} ({Provider})";
-}
+    long CacheRead);

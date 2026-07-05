@@ -1,7 +1,7 @@
-using System.Collections.ObjectModel;
-using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
+using System.Globalization;
 using TokenTrackerWidget.Models;
 using TokenTrackerWidget.Services;
 
@@ -39,7 +39,6 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     public ObservableCollection<ModelRowViewModel> ModelRows { get; } = new();
 
     public void Start() => _poller.Start();
-    public void Stop() => _poller.Stop();
     public void ForceNow() => _poller.Force();
     public void SetInterval(double s) => _poller.SetInterval(s);
 

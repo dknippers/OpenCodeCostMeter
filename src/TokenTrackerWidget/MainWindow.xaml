@@ -19,14 +19,10 @@
     <Window.Resources>
         <SolidColorBrush x:Key="MicaBg" Color="#20201F"/>
         <SolidColorBrush x:Key="MicaStroke" Color="#4A4A4A"/>
-        <SolidColorBrush x:Key="LayerStroke" Color="#3A3A3A"/>
         <SolidColorBrush x:Key="OnSurface" Color="#E5E2E1"/>
         <SolidColorBrush x:Key="OnSurfaceVariant" Color="#C0C7D4"/>
-        <SolidColorBrush x:Key="Primary" Color="#A3C9FF"/>
         <SolidColorBrush x:Key="Secondary" Color="#61DBB4"/>
-        <SolidColorBrush x:Key="SurfaceLowest" Color="#0E0E0E"/>
         <SolidColorBrush x:Key="RowHover" Color="#2A2A2A"/>
-        <conv:BoolToBrushConverter x:Key="LiveBrush"/>
         <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
         <conv:BoolToDoubleConverter x:Key="ExpandAngle" TrueValue="180" FalseValue="0"/>
         <conv:BoolToBrushConverter x:Key="AmountHighlightBrush" TrueBrush="{StaticResource Secondary}" FalseBrush="{StaticResource OnSurface}"/>
@@ -36,28 +32,6 @@
         <FontFamily x:Key="MonoFont">Cascadia Mono, Cascadia Code, Consolas</FontFamily>
         <Style TargetType="Border">
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-        </Style>
-        <Style x:Key="IconBtn" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="{StaticResource OnSurfaceVariant}"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Padding" Value="6"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource RowHover}"/>
-                                <Setter Property="Foreground" Value="{StaticResource OnSurface}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
         </Style>
         <Style x:Key="GhostBtn" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>

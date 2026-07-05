@@ -1,6 +1,5 @@
-using System.Globalization;
-using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
+using System.Globalization;
 using TokenTrackerWidget.Models;
 
 namespace TokenTrackerWidget.ViewModels;
@@ -10,18 +9,12 @@ public partial class ModelRowViewModel : ObservableObject
     public string Header { get; }
     public string CostText { get; }
 
-    [ObservableProperty] private Brush _accentBrush;
     [ObservableProperty] private bool _isCostHighlighted;
 
     public ModelRowViewModel(ModelBreakdown b)
     {
         Header = DisplayHeader(b);
         CostText = b.Cost.ToString("C2", CultureInfo.GetCultureInfo("en-US"));
-        var color = ModelColorResolver.For(b.Provider, b.Model);
-        AccentBrush = new SolidColorBrush(color)
-        {
-            Opacity = 0.9
-        };
     }
 
     private static string DisplayHeader(ModelBreakdown b)
