@@ -22,8 +22,7 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string _activeModelText = "no active session";
     [ObservableProperty] private bool _isLive;
     [ObservableProperty] private string _todayCostText = "$0.00";
-    [ObservableProperty] private string _todayCostDeltaText = "";
-    [ObservableProperty] private bool _hasDelta;
+    [ObservableProperty] private bool _isTodayCostHighlighted;
     [ObservableProperty] private string _callsText = "0 calls";
     [ObservableProperty] private bool _isRetrying;
     [ObservableProperty] private string _lastErrorText = "";
@@ -38,6 +37,7 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
 
     private double _lastCost = 0.0;
     private bool _isFirstUpdate = true;
+    private readonly Dictionary<string, double> _lastModelCosts = new();
 
     public ObservableCollection<ModelRowViewModel> ModelRows { get; } = new();
 
@@ -57,39 +57,52 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
         var cost = snap.Cost;
         if (_isFirstUpdate)
         {
-            TodayCostDeltaText = string.Empty;
-            HasDelta = false;
+            IsTodayCostHighlighted = false;
             _isFirstUpdate = false;
         }
         else
         {
             var delta = cost - _lastCost;
-            if (Math.Abs(delta) > 0.0001)
-            {
-                TodayCostDeltaText = (delta > 0 ? "+" : "") + delta.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
-                HasDelta = true;
-            }
-            else
-            {
-                TodayCostDeltaText = string.Empty;
-                HasDelta = false;
-            }
+            IsTodayCostHighlighted = Math.Abs(delta) > 0.0001;
         }
         _lastCost = cost;
         TodayCostText = cost.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
 
         CallsText = $"{snap.Calls} {(snap.Calls == 1 ? "call" : "calls")}";
 
+        var highlightedModels = new HashSet<string>();
+        foreach (var b in snap.Models)
+        {
+            var key = ModelKey(b);
+            if (b.Cost - _lastModelCosts.GetValueOrDefault(key) > 0.0001)
+            {
+                highlightedModels.Add(key);
+            }
+        }
+
         ModelRows.Clear();
         foreach (var b in snap.Models)
         {
             if (b.Cost < 0.005) continue;
-            ModelRows.Add(new ModelRowViewModel(b));
+            var row = new ModelRowViewModel(b)
+            {
+                IsCostHighlighted = highlightedModels.Contains(ModelKey(b))
+            };
+            ModelRows.Add(row);
+        }
+
+        _lastModelCosts.Clear();
+        foreach (var b in snap.Models)
+        {
+            _lastModelCosts[ModelKey(b)] = b.Cost;
         }
 
         IsRetrying = false;
         LastErrorText = string.Empty;
     }
+
+    private static string ModelKey(ModelBreakdown b)
+        => string.IsNullOrEmpty(b.Provider) ? b.Model : $"{b.Provider}/{b.Model}";
 
     private void OnError(object? sender, Exception ex)
     {

@@ -13,6 +13,7 @@ public partial class ModelRowViewModel : ObservableObject
     public string CostText { get; }
 
     [ObservableProperty] private Brush _accentBrush;
+    [ObservableProperty] private bool _isCostHighlighted;
 
     public ModelRowViewModel(ModelBreakdown b)
     {

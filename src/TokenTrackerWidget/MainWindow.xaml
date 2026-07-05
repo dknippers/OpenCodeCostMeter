@@ -29,6 +29,8 @@
         <conv:BoolToBrushConverter x:Key="LiveBrush"/>
         <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
         <conv:BoolToDoubleConverter x:Key="ExpandAngle" TrueValue="180" FalseValue="0"/>
+        <conv:BoolToBrushConverter x:Key="AmountHighlightBrush" TrueBrush="{StaticResource Secondary}" FalseBrush="{StaticResource OnSurface}"/>
+        <conv:BoolToBrushConverter x:Key="ModelCostHighlightBrush" TrueBrush="{StaticResource Secondary}" FalseBrush="{StaticResource OnSurfaceVariant}"/>
         <CubicEase x:Key="EaseOut" EasingMode="EaseOut"/>
         <FontFamily x:Key="UiFont">Segoe UI Variable, Segoe UI, Inter</FontFamily>
         <FontFamily x:Key="MonoFont">Cascadia Mono, Cascadia Code, Consolas</FontFamily>
@@ -96,13 +98,9 @@
         <StackPanel Margin="16,14">
 
                 <!-- Primary Spend Card -->
-                <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                    <TextBlock Text="{Binding TodayCostText}" FontFamily="{StaticResource UiFont}" FontSize="32" FontWeight="Bold"
-                               Foreground="{StaticResource OnSurface}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="{Binding TodayCostDeltaText}" FontFamily="{StaticResource MonoFont}" FontSize="11"
-                               Foreground="{StaticResource Secondary}" HorizontalAlignment="Center"
-                               Visibility="{Binding HasDelta, Converter={StaticResource BoolToVis}}"/>
-                </StackPanel>
+                <TextBlock Text="{Binding TodayCostText}" FontFamily="{StaticResource UiFont}" FontSize="32" FontWeight="Bold"
+                           Foreground="{Binding IsTodayCostHighlighted, Converter={StaticResource AmountHighlightBrush}}"
+                           HorizontalAlignment="Center"/>
 
                 <!-- Breakdown List -->
                 <Border x:Name="BreakdownContainer" ClipToBounds="True" Visibility="Collapsed" MaxHeight="0" Opacity="0" Padding="0,12,0,0">
@@ -160,7 +158,7 @@
                                         <TextBlock Grid.Column="0" Text="{Binding Header}" FontFamily="{StaticResource UiFont}" FontSize="12" FontWeight="Medium"
                                                    Foreground="{StaticResource OnSurface}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                         <TextBlock Grid.Column="1" Text="{Binding CostText}" FontFamily="{StaticResource MonoFont}" FontSize="11" FontWeight="Medium"
-                                                   Foreground="{StaticResource OnSurfaceVariant}" VerticalAlignment="Center"
+                                                   Foreground="{Binding IsCostHighlighted, Converter={StaticResource ModelCostHighlightBrush}}" VerticalAlignment="Center"
                                                    HorizontalAlignment="Right" Margin="12,0,0,0"/>
                                     </Grid>
                                 </Border>
