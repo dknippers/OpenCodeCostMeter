@@ -96,7 +96,7 @@
         <StackPanel Margin="16,14">
 
                 <!-- Primary Spend Card -->
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center">
                     <TextBlock Text="{Binding TodayCostText}" FontFamily="{StaticResource UiFont}" FontSize="32" FontWeight="Bold"
                                Foreground="{StaticResource OnSurface}"/>
                     <StackPanel Orientation="Horizontal" Margin="8,0,0,6" VerticalAlignment="Center"
@@ -179,7 +179,7 @@
 
                 <!-- Usage Details Toggle -->
                 <Button Margin="0,6,0,0"
-                        HorizontalAlignment="Left"
+                        HorizontalAlignment="Center"
                         Style="{StaticResource GhostBtn}"
                         Command="{Binding ToggleBreakdownCommand}">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
