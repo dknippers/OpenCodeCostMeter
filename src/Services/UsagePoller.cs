@@ -10,6 +10,7 @@ public sealed class UsagePoller : IDisposable
     private readonly DispatcherTimer _timer;
     private bool _running;
     private bool _disposed;
+    private bool _inFlight;
 
     public UsagePoller(IUsageRepository repo, double intervalSeconds)
     {
@@ -48,7 +49,8 @@ public sealed class UsagePoller : IDisposable
 
     private async Task OnTickAsync()
     {
-        if (_disposed) return;
+        if (_disposed || _inFlight) return;
+        _inFlight = true;
         var start = StartOfTodayMs();
         try
         {
@@ -58,6 +60,10 @@ public sealed class UsagePoller : IDisposable
         catch (Exception ex)
         {
             Error?.Invoke(this, ex);
+        }
+        finally
+        {
+            _inFlight = false;
         }
     }
 
