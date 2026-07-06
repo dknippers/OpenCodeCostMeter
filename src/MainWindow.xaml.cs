@@ -2,16 +2,30 @@ using OpenCodeCostMeter.Models;
 using OpenCodeCostMeter.ViewModels;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace OpenCodeCostMeter;
 
 public partial class MainWindow : Window
 {
+    private static readonly TimeSpan HoverDelay = TimeSpan.FromMilliseconds(100);
+
     private WidgetSettings _settings = new();
+    private readonly DispatcherTimer _hoverTimer;
+    private bool _hoverShowPending;
 
     public MainWindow()
     {
         InitializeComponent();
+        _hoverTimer = new DispatcherTimer { Interval = HoverDelay };
+        _hoverTimer.Tick += (_, _) =>
+        {
+            _hoverTimer.Stop();
+            if (_hoverShowPending)
+                ToggleButton.Visibility = Visibility.Visible;
+            else
+                ToggleButton.Visibility = Visibility.Collapsed;
+        };
     }
 
     public WidgetSettings Settings
@@ -63,12 +77,16 @@ public partial class MainWindow : Window
 
     private void OnCardMouseEnter(object sender, MouseEventArgs e)
     {
-        ToggleButton.Visibility = Visibility.Visible;
+        _hoverTimer.Stop();
+        _hoverShowPending = true;
+        _hoverTimer.Start();
     }
 
     private void OnCardMouseLeave(object sender, MouseEventArgs e)
     {
-        ToggleButton.Visibility = Visibility.Collapsed;
+        _hoverTimer.Stop();
+        _hoverShowPending = false;
+        _hoverTimer.Start();
     }
 
     private System.Windows.Controls.ContextMenu BuildMenu()
