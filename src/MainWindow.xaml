@@ -145,7 +145,7 @@
 
             <StackPanel Visibility="{Binding HasModels, Converter={StaticResource BoolToVis}}">
                 <!-- Breakdown List -->
-                <Border x:Name="BreakdownContainer" ClipToBounds="True" Visibility="Collapsed" MaxHeight="0" Opacity="0" Padding="0">
+                <Border x:Name="BreakdownContainer" ClipToBounds="True" Visibility="Collapsed" MaxHeight="600" Opacity="0" Padding="0">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Style.Triggers>
@@ -156,19 +156,17 @@
                                                 <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
                                                     <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
                                                 </ObjectAnimationUsingKeyFrames>
-                                                <DoubleAnimation Storyboard.TargetProperty="MaxHeight" From="0" To="300" Duration="0:0:0.3" EasingFunction="{StaticResource EaseOut}"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.25" EasingFunction="{StaticResource EaseOut}"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.05"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </DataTrigger.EnterActions>
                                     <DataTrigger.ExitActions>
                                         <BeginStoryboard>
                                             <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="MaxHeight" To="0" Duration="0:0:0.25" EasingFunction="{StaticResource EaseOut}"/>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2" EasingFunction="{StaticResource EaseOut}"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.05"/>
                                                 <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
                                                     <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:0.25" Value="{x:Static Visibility.Collapsed}"/>
+                                                    <DiscreteObjectKeyFrame KeyTime="0:0:0.05" Value="{x:Static Visibility.Collapsed}"/>
                                                 </ObjectAnimationUsingKeyFrames>
                                             </Storyboard>
                                         </BeginStoryboard>
@@ -177,34 +175,36 @@
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <ItemsControl ItemsSource="{Binding ModelRows}" Margin="0,10,0,0" Visibility="{Binding IsBreakdownExpanded, Converter={StaticResource BoolToVis}}" FocusVisualStyle="{x:Null}" Focusable="False">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type vm:ModelRowViewModel}">
-                                <Border CornerRadius="0" Padding="8,6" Margin="0" Background="Transparent">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Style.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource RowHover}"/>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="{Binding Header}" FontFamily="{StaticResource MonoFont}" FontSize="14" FontWeight="Medium"
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+                        <ItemsControl ItemsSource="{Binding ModelRows}" Margin="0,10,0,0" Visibility="{Binding IsBreakdownExpanded, Converter={StaticResource BoolToVis}}" FocusVisualStyle="{x:Null}" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:ModelRowViewModel}">
+                                    <Border CornerRadius="0" Padding="8,6" Margin="0" Background="Transparent">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource RowHover}"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Header}" FontFamily="{StaticResource MonoFont}" FontSize="14" FontWeight="Medium"
                                                        Foreground="{StaticResource OnSurface}" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding CostText}" FontFamily="{StaticResource MonoFont}" FontSize="14" FontWeight="Medium"
+                                            <TextBlock Grid.Column="1" Text="{Binding CostText}" FontFamily="{StaticResource MonoFont}" FontSize="14" FontWeight="Medium"
                                                        Foreground="{Binding IsCostHighlighted, Converter={StaticResource ModelCostHighlightBrush}}" VerticalAlignment="Bottom"
                                                        HorizontalAlignment="Right" Margin="12,0,0,0"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </Border>
 
                 <!-- Usage Details Toggle -->
