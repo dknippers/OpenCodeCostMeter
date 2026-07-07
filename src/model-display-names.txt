@@ -13,6 +13,6 @@
 #
 # Lines starting with # are comments. Blank lines are ignored.
 
-mimo-|Mimo V=MiMo-V
-deepseek-|Deepseek=DeepSeek
-glm-|GLM 5=GLM-5
+mimo-|Mimo=MiMo; =-
+deepseek-|Deepseek=DeepSeek; =-
+glm-| =-
