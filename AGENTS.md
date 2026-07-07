@@ -24,12 +24,12 @@ Key details about the schema:
 
 ### Data Layer (`Data/`)
 - **DbLocator** - Resolves the database path (default or from the `--db-path` command-line argument)
-- **MessageTableRepository** - Primary repo that queries the `message` table for today's totals and per-model breakdowns
-- **SessionTableSanityChecker** - Unused diagnostic cross-check (not wired up)
+- **DayKey** - Static helper in `DbLocator.cs`; converts a Unix-ms timestamp to a `yyyy-MM-dd` string
+- **MessageTableRepository** - Primary repo that queries the `message` table for today's totals and per-model breakdowns. Single SQL query with inner `GROUP BY (time.created, time.completed)` to deduplicate forked messages before aggregating per provider/model.
 - **IUsageRepository** - Interface for repositories
 
 ### Services (`Services/`)
-- **UsagePoller** - DispatcherTimer-based poller that calls the repo and fires Updated/Error events
+- **UsagePoller** - DispatcherTimer-based poller that calls the repo and fires Updated/Error events. Implements `IDisposable`. Has an `_inFlight` guard to prevent overlapping queries if a poll takes longer than the interval.
 - **SettingsStore** - Persists/loads WidgetSettings to JSON file next to the exe
 
 ### ViewModels (`ViewModels/`)
@@ -37,7 +37,7 @@ Key details about the schema:
 - **ModelRowViewModel** - One per breakdown row in the details section
 
 ### Models (`Models/`)
-- **DayUsageSnapshot** - Today's aggregated data (input/output/reasoning/cache tokens, cost, calls, per-model breakdown, active session info)
+- **DayUsageSnapshot** - Today's aggregated data (`DayKey`, input/output/reasoning/cacheRead/cacheWrite tokens, cost, per-model breakdown, taken-at timestamp)
 - **ModelBreakdown** - Per-model cost and token counts
 - **WidgetSettings** - Persisted JSON settings (window position, opacity, poll interval, always-on-top)
 
@@ -74,7 +74,6 @@ src/
 ├─ Services/                     # Polling and settings persistence
 ├─ ViewModels/                    # UI binding logic
 ├─ Converters/                   # WPF value converters (BoolToVisibility, BoolToDouble, BoolToBrush)
-├─ ModelColorResolver.cs         # Provider/model → accent color
 ├─ FormatUtil.cs                 # Number/currency formatting
 ├─ MainWindow.xaml/.cs           # Borderless topmost widget window
 ├─ App.xaml/.cs                   # Application bootstrap
