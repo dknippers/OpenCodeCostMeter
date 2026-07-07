@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using OpenCodeCostMeter.Models;
+using OpenCodeCostMeter.Services;
 using System.Globalization;
 
 namespace OpenCodeCostMeter.ViewModels;
@@ -13,14 +14,7 @@ public partial class ModelRowViewModel : ObservableObject
 
     public ModelRowViewModel(ModelBreakdown b)
     {
-        Header = DisplayHeader(b);
+        Header = ModelDisplayNameRules.Format(b.Model);
         CostText = b.Cost.ToString("C2", CultureInfo.GetCultureInfo("en-US"));
-    }
-
-    private static string DisplayHeader(ModelBreakdown b)
-    {
-        if (string.IsNullOrEmpty(b.Model)) return "(unknown)";
-        if (string.IsNullOrEmpty(b.Provider)) return b.Model;
-        return b.Model;
     }
 }

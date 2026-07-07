@@ -1,0 +1,18 @@
+# Model display name rules
+# Format: prefix|FindText1=ReplaceText1;FindText2=ReplaceText2
+#
+# The default rule is applied first:
+#   1. Replace "-" with " "
+#   2. Title-case each word
+#
+# Then if the model id starts with the given prefix (case-insensitive),
+# additional find/replace operations are applied on the already-defaulted string.
+#
+# Use "*" as a prefix to apply replacements to ALL models (applied after prefix rules).
+# Example: *|V=v would lowercase every standalone "V" in any model name.
+#
+# Lines starting with # are comments. Blank lines are ignored.
+
+mimo-|Mimo V=MiMo-V
+deepseek-|Deepseek=DeepSeek
+glm-|GLM 5=GLM-5
