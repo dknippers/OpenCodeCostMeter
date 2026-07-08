@@ -105,6 +105,7 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
             if (_rowsByKey.TryGetValue(key, out var existing))
             {
                 row = existing;
+                row.CostText = modelCostText;
             }
             else
             {

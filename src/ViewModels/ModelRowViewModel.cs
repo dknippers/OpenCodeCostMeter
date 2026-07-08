@@ -10,8 +10,8 @@ public partial class ModelRowViewModel : ObservableObject
     private static readonly CultureInfo EnUs = CultureInfo.GetCultureInfo("en-US");
 
     public string Header { get; }
-    public string CostText { get; }
 
+    [ObservableProperty] private string _costText = "";
     [ObservableProperty] private bool _isCostHighlighted;
 
     public ModelRowViewModel(ModelBreakdown b)
