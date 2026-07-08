@@ -50,7 +50,7 @@ public static class ModelDisplayNameRules
             if (pipeIdx <= 0) continue;
 
             var prefix = line[..pipeIdx].Trim();
-            var pairsPart = line[(pipeIdx + 1)..].Trim();
+            var pairsPart = line[(pipeIdx + 1)..];
 
             var replacements = new List<(string Find, string Replace)>();
             foreach (var pair in pairsPart.Split(';', StringSplitOptions.RemoveEmptyEntries))

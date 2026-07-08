@@ -13,8 +13,12 @@
 #
 # Lines starting with # are comments. Blank lines are ignored.
 
-mimo-|Mimo=MiMo; =-
+# General rules for all models
+*| Mini= mini; Nano= nano
+
+# Model specific rules
 deepseek-|Deepseek=DeepSeek; =-
 glm-| =-
 gpt-|Gpt =GPT-
-*| Mini=mini; Nano=nano
+mimo-|Mimo=MiMo; =-
+minimax-|Minimax=MiniMax
