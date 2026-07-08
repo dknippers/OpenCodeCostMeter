@@ -1,6 +1,12 @@
+# /// script
+# dependencies = [
+#   "resvg-python",
+#   "Pillow",
+# ]
+# ///
+#
 # Generate icon.ico from icon.svg.
 # Run with: uv run --python 3.12 src/Assets/generate-icon.py
-# Requires: resvg-python, Pillow
 
 import resvg_python
 from PIL import Image
