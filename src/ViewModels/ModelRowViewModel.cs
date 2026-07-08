@@ -17,6 +17,6 @@ public partial class ModelRowViewModel : ObservableObject
     public ModelRowViewModel(ModelBreakdown b)
     {
         Header = ModelDisplayNameRules.Format(b.Model);
-        CostText = b.Cost.ToString("C2", EnUs);
+        CostText = b.Cost.ToString("C3", EnUs);
     }
 }

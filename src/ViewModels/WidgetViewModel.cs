@@ -90,10 +90,10 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
         foreach (var b in snap.Models)
         {
             var key = ModelKey(b);
-            var modelCostText = b.Cost.ToString("C2", EnUs);
+            var modelCostText = b.Cost.ToString("C3", EnUs);
             nextCostTexts[key] = modelCostText;
 
-            if (b.Cost < 0.005) continue;
+            if (b.Cost < 0.0005) continue;
 
             var newlyHighlighted = canHighlight
                 && _lastModelCostTexts.TryGetValue(key, out var prev) && prev != modelCostText;
