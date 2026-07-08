@@ -21,9 +21,6 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        Activated += EnsureTopMost;
-        Deactivated += EnsureTopMost;
-
         _hoverTimer = new DispatcherTimer { Interval = HoverDelay };
         _hoverTimer.Tick += (_, _) =>
         {
@@ -63,17 +60,6 @@ public partial class MainWindow : Window
     {
         Topmost = _settings.AlwaysOnTop;
         Opacity = Math.Clamp(_settings.Opacity, 0.05, 1.0);
-    }
-
-    private void EnsureTopMost(object? sender, EventArgs e)
-    {
-        if (!_settings.AlwaysOnTop) return;
-
-        // WPF's DependencyProperty system skips the setter when the value hasn't changed,
-        // so setting Topmost = true when it's already true is a no-op. Toggle off then on
-        // to force the underlying SetWindowPos(HWND_TOPMOST) call.
-        Topmost = false;
-        Topmost = true;
     }
 
     private void OnSettingsChanged()
