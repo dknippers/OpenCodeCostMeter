@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-OpenCodeCostMeter is a Windows 11 desktop widget that displays today's OpenCode LLM spend in real-time, broken down by model. It reads the opencode SQLite database directly (read-only) and refreshes every few seconds.
+OpenCode Cost Meter is a Windows 11 desktop widget that displays today's OpenCode LLM spend in real-time, broken down by model. It reads the opencode SQLite database directly (read-only) and refreshes every few seconds.
 
 ## Tech Stack
 
@@ -17,6 +17,7 @@ OpenCodeCostMeter is a Windows 11 desktop widget that displays today's OpenCode 
 The widget reads from opencode's SQLite database at `%USERPROFILE%\.local\share\opencode\opencode.db`.
 
 Key details about the schema:
+
 - Uses the `message` table (not `session`) because `session` maintains cumulative tokens across the entire session lifetime, which would incorrectly attribute past tokens to today's date.
 - Each assistant message has a `data` JSON column containing `$.time.completed` (Unix ms timestamp), `$.tokens.*`, `$.cost`, `$.providerID`, and `$.modelID`.
 - The widget filters messages by `$.time.completed` to only count today's calls.
@@ -24,21 +25,25 @@ Key details about the schema:
 ## Architecture
 
 ### Data Layer (`Data/`)
+
 - **DbLocator** - Resolves the database path (default or from the `--db-path` command-line argument)
 - **DayKey** - Static helper in `DbLocator.cs`; converts a Unix-ms timestamp to a `yyyy-MM-dd` string
 - **MessageTableRepository** - Primary repo that queries the `message` table for today's totals and per-model breakdowns. Single SQL query with inner `GROUP BY (time.created, time.completed)` to deduplicate forked messages before aggregating per provider/model.
 - **IUsageRepository** - Interface for repositories
 
 ### Services (`Services/`)
+
 - **UsagePoller** - DispatcherTimer-based poller that calls the repo and fires Updated/Error events. Implements `IDisposable`. Has an `_inFlight` guard to prevent overlapping queries if a poll takes longer than the interval.
 - **SettingsStore** - Persists/loads WidgetSettings to JSON file next to the exe
 - **TrayIconService** - Wraps a Windows Forms `NotifyIcon`. Double-clicking the tray icon toggles widget visibility; the context menu has **Exit**. Loads the embedded `Assets/icon.ico`. Closing the widget window hides it to the tray; only **Exit** terminates the application.
 
 ### ViewModels (`ViewModels/`)
+
 - **WidgetViewModel** - Main VM; binds to the UI, tracks cost deltas for highlighting, manages ModelRows collection
 - **ModelRowViewModel** - One per breakdown row in the details section
 
 ### Models (`Models/`)
+
 - **DayUsageSnapshot** - Today's aggregated data (`DayKey`, input/output/reasoning/cacheRead/cacheWrite tokens, cost, per-model breakdown, taken-at timestamp)
 - **ModelBreakdown** - Per-model cost and token counts
 - **WidgetSettings** - Persisted JSON settings (window position, opacity, poll interval, always-on-top)
@@ -46,7 +51,7 @@ Key details about the schema:
 ## Key Design Decisions
 
 1. **Read-only SQLite** - Connection uses `SqliteOpenMode.ReadOnly` and `DefaultTimeout = 2` to survive database locks
-2. **Today only** - Tokens are attributed to the day the message *completed*, not when the session started
+2. **Today only** - Tokens are attributed to the day the message _completed_, not when the session started
 3. **Non-blocking UI** - Slow queries don't freeze the UI; last known values stay on screen during refresh
 4. **Cost delta highlighting** - New spend since last poll is highlighted briefly
 5. **System tray** - The widget lives in the system tray; closing the widget hides it to the tray. **Hide** and **Exit** are available in the widget's context menu; the tray menu has **Exit**.
