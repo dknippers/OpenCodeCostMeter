@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -9,29 +8,30 @@ namespace OpenCodeCostMeter.Services;
 public static class ModelDisplayNameRules
 {
     private static readonly Lazy<List<PrefixRule>> Rules = new(LoadRules);
-    private static readonly ConcurrentDictionary<string, string> Cache = new();
+    private static readonly Dictionary<string, string> Cache = new();
 
     public static string Format(string modelId)
     {
         if (string.IsNullOrWhiteSpace(modelId)) return "(unknown)";
 
-        return Cache.GetOrAdd(modelId, static id =>
+        if (Cache.TryGetValue(modelId, out var cached))
+            return cached;
+
+        var result = ApplyDefault(modelId);
+
+        foreach (var rule in Rules.Value)
         {
-            var result = ApplyDefault(id);
+            if (rule.Prefix != "*" && !modelId.StartsWith(rule.Prefix, StringComparison.OrdinalIgnoreCase))
+                continue;
 
-            foreach (var rule in Rules.Value)
+            foreach (var (find, replace) in rule.Replacements)
             {
-                if (rule.Prefix != "*" && !id.StartsWith(rule.Prefix, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                foreach (var (find, replace) in rule.Replacements)
-                {
-                    result = result.Replace(find, replace, StringComparison.Ordinal);
-                }
+                result = result.Replace(find, replace, StringComparison.Ordinal);
             }
+        }
 
-            return result;
-        });
+        Cache[modelId] = result;
+        return result;
     }
 
     private static string ApplyDefault(string modelId)

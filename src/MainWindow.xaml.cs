@@ -10,9 +10,11 @@ namespace OpenCodeCostMeter;
 public partial class MainWindow : Window
 {
     private static readonly TimeSpan HoverDelay = TimeSpan.FromMilliseconds(100);
+    private static readonly TimeSpan SaveDebounceDelay = TimeSpan.FromMilliseconds(500);
 
     private WidgetSettings _settings = new();
     private readonly DispatcherTimer _hoverTimer;
+    private readonly DispatcherTimer _saveDebounce;
     private bool _hoverShowPending;
 
     public bool IsExitRequested { get; set; }
@@ -29,6 +31,13 @@ public partial class MainWindow : Window
                 ToggleButton.Visibility = Visibility.Visible;
             else
                 ToggleButton.Visibility = Visibility.Collapsed;
+        };
+
+        _saveDebounce = new DispatcherTimer { Interval = SaveDebounceDelay };
+        _saveDebounce.Tick += (_, _) =>
+        {
+            _saveDebounce.Stop();
+            SettingsChanged?.Invoke(this, EventArgs.Empty);
         };
     }
 
@@ -65,7 +74,8 @@ public partial class MainWindow : Window
     private void OnSettingsChanged()
     {
         ApplySettingsToVisuals();
-        SettingsChanged?.Invoke(this, EventArgs.Empty);
+        _saveDebounce.Stop();
+        _saveDebounce.Start();
     }
 
     private void OnCardMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

@@ -58,7 +58,8 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     private Dictionary<string, string> _lastModelCostTexts = new();
     private readonly Dictionary<string, ModelRowViewModel> _rowsByKey = new();
 
-    public ObservableCollection<ModelRowViewModel> ModelRows { get; } = new();
+    [ObservableProperty]
+    private ObservableCollection<ModelRowViewModel> _modelRows = new();
 
     public void Start() => _poller.Start();
     public void ForceNow() => _poller.Force();
@@ -123,15 +124,12 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
                 sameSequence = false;
         }
 
-        if (!sameSequence && visibleKeys.Count == 0)
+        if (!sameSequence)
         {
-            ModelRows.Clear();
-        }
-        else if (!sameSequence)
-        {
-            ModelRows.Clear();
+            var newRows = new ObservableCollection<ModelRowViewModel>();
             foreach (var key in visibleKeys)
-                ModelRows.Add(_rowsByKey[key]);
+                newRows.Add(_rowsByKey[key]);
+            ModelRows = newRows;
         }
 
         // Remove stale entries from _rowsByKey (rows no longer in any snapshot).

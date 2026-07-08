@@ -91,7 +91,6 @@ src/
 ├─ Services/                      # Polling, settings persistence, and tray icon
 ├─ ViewModels/                    # UI binding logic
 ├─ Converters/                    # WPF value converters (BoolToVisibility, BoolToDouble, BoolToBrush)
-├─ FormatUtil.cs                  # Number/currency formatting
 ├─ MainWindow.xaml/.cs            # Borderless topmost widget window
 ├─ App.xaml/.cs                   # Application bootstrap
 └─ OpenCodeCostMeter.csproj       # Project file
