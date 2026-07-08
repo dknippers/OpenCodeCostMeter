@@ -19,13 +19,13 @@
         <SolidColorBrush x:Key="MicaBg" Color="#20201F"/>
         <SolidColorBrush x:Key="MicaStroke" Color="#4A4A4A"/>
         <SolidColorBrush x:Key="OnSurface" Color="#E5E2E1"/>
-        <SolidColorBrush x:Key="OnSurfaceVariant" Color="#C0C7D4"/>
+        <SolidColorBrush x:Key="OnSurfaceVariant" Color="#ADABAA"/>
         <SolidColorBrush x:Key="Secondary" Color="#61DBB4"/>
         <SolidColorBrush x:Key="RowHover" Color="#2A2A2A"/>
         <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
         <conv:BoolToDoubleConverter x:Key="ExpandAngle" TrueValue="180" FalseValue="0"/>
         <conv:BoolToBrushConverter x:Key="AmountHighlightBrush" TrueBrush="{StaticResource Secondary}" FalseBrush="{StaticResource OnSurface}"/>
-        <conv:BoolToBrushConverter x:Key="ModelCostHighlightBrush" TrueBrush="{StaticResource Secondary}" FalseBrush="{StaticResource OnSurface}"/>
+        <conv:BoolToBrushConverter x:Key="ModelCostHighlightBrush" TrueBrush="{StaticResource Secondary}" FalseBrush="{StaticResource OnSurfaceVariant}"/>
         <CubicEase x:Key="EaseOut" EasingMode="EaseOut"/>
         <FontFamily x:Key="UiFont">Segoe UI Variable, Segoe UI</FontFamily>
         <FontFamily x:Key="MonoFont">Cascadia Mono, Consolas</FontFamily>
@@ -223,7 +223,7 @@
                                                        Foreground="{StaticResource OnSurface}" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis"/>
                                             <TextBlock Grid.Column="1" Text="{Binding CostText}" FontFamily="{StaticResource MonoFont}" FontSize="14" FontWeight="Medium"
                                                        Foreground="{Binding IsCostHighlighted, Converter={StaticResource ModelCostHighlightBrush}}" VerticalAlignment="Bottom"
-                                                       HorizontalAlignment="Right" Margin="12,0,0,0"/>
+                                                       HorizontalAlignment="Right" Margin="24,0,0,0"/>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
