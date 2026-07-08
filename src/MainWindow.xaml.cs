@@ -1,5 +1,6 @@
 using OpenCodeCostMeter.Models;
 using OpenCodeCostMeter.ViewModels;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -13,6 +14,8 @@ public partial class MainWindow : Window
     private WidgetSettings _settings = new();
     private readonly DispatcherTimer _hoverTimer;
     private bool _hoverShowPending;
+
+    public bool IsExitRequested { get; set; }
 
     public MainWindow()
     {
@@ -30,6 +33,17 @@ public partial class MainWindow : Window
             else
                 ToggleButton.Visibility = Visibility.Collapsed;
         };
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        if (!IsExitRequested)
+        {
+            e.Cancel = true;
+            Hide();
+        }
+
+        base.OnClosing(e);
     }
 
     public WidgetSettings Settings
@@ -91,14 +105,14 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
-    private void OnCardMouseEnter(object sender, MouseEventArgs e)
+    private void OnCardMouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
     {
         _hoverTimer.Stop();
         _hoverShowPending = true;
         _hoverTimer.Start();
     }
 
-    private void OnCardMouseLeave(object sender, MouseEventArgs e)
+    private void OnCardMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
     {
         _hoverTimer.Stop();
         _hoverShowPending = false;
@@ -192,9 +206,17 @@ public partial class MainWindow : Window
         opacitySliderItem.Header = opacityPanel;
         menu.Items.Add(opacitySliderItem);
 
-        var quit = new System.Windows.Controls.MenuItem { Header = "Quit", Style = itemStyle };
-        quit.Click += (_, _) => Close();
-        menu.Items.Add(quit);
+        var hideItem = new System.Windows.Controls.MenuItem { Header = "Hide", Style = itemStyle };
+        hideItem.Click += (_, _) => Hide();
+        menu.Items.Add(hideItem);
+
+        var exitItem = new System.Windows.Controls.MenuItem { Header = "Exit", Style = itemStyle };
+        exitItem.Click += (_, _) =>
+        {
+            IsExitRequested = true;
+            Close();
+        };
+        menu.Items.Add(exitItem);
 
         return menu;
     }

@@ -8,13 +8,14 @@ using OpenCodeCostMeter.ViewModels;
 
 namespace OpenCodeCostMeter;
 
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
     private WidgetSettings _settings = new();
     private SettingsStore _store = null!;
     private UsagePoller _poller = null!;
     private WidgetViewModel _vm = null!;
     private MainWindow _window = null!;
+    private TrayIconService _trayIcon = null!;
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool AttachConsole(int dwProcessId);
@@ -62,6 +63,13 @@ public partial class App : Application
         _window.Closed += OnWindowClosed;
 
         ShowWindow();
+
+        _trayIcon = new TrayIconService(_window, "OpenCode Cost Meter", () =>
+        {
+            _window.IsExitRequested = true;
+            Shutdown();
+        });
+
         _vm.Start();
     }
 
@@ -96,6 +104,7 @@ public partial class App : Application
             _store.Save(_settings);
             _vm.Dispose();
             _poller.Dispose();
+            _trayIcon?.Dispose();
         }
         catch
         {
@@ -152,7 +161,7 @@ public partial class App : Application
             ? $"Database not found: {commandLinePath}"
             : $"Could not find the opencode database at{Environment.NewLine}{DbLocator.DefaultPath()}{Environment.NewLine}{Environment.NewLine}Use --db-path <path> to specify an alternative location.";
 
-        MessageBox.Show(message, "OpenCode Cost Meter",
+        System.Windows.MessageBox.Show(message, "OpenCode Cost Meter",
             MessageBoxButton.OK, MessageBoxImage.Error);
     }
 

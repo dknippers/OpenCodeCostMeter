@@ -6,10 +6,11 @@ OpenCodeCostMeter is a Windows 11 desktop widget that displays today's OpenCode 
 
 ## Tech Stack
 
-- **.NET 10** (WPF, Windows target)
+- **.NET 10** (WPF + Windows Forms, Windows target)
 - **CommunityToolkit.Mvvm** 8.4.2 - MVVM framework
 - **Microsoft.Data.Sqlite** 10.0.9 - SQLite access
 - **SQLitePCLRaw.lib.e_sqlite3** 2.1.11 - native SQLite
+- **System.Windows.Forms.NotifyIcon** - system tray icon
 
 ## Database
 
@@ -31,6 +32,7 @@ Key details about the schema:
 ### Services (`Services/`)
 - **UsagePoller** - DispatcherTimer-based poller that calls the repo and fires Updated/Error events. Implements `IDisposable`. Has an `_inFlight` guard to prevent overlapping queries if a poll takes longer than the interval.
 - **SettingsStore** - Persists/loads WidgetSettings to JSON file next to the exe
+- **TrayIconService** - Wraps a Windows Forms `NotifyIcon`. Double-clicking the tray icon toggles widget visibility; the context menu has **Exit**. Closing the widget window hides it to the tray; only **Exit** terminates the application.
 
 ### ViewModels (`ViewModels/`)
 - **WidgetViewModel** - Main VM; binds to the UI, tracks cost deltas for highlighting, manages ModelRows collection
@@ -47,6 +49,7 @@ Key details about the schema:
 2. **Today only** - Tokens are attributed to the day the message *completed*, not when the session started
 3. **Non-blocking UI** - Slow queries don't freeze the UI; last known values stay on screen during refresh
 4. **Cost delta highlighting** - New spend since last poll is highlighted briefly
+5. **System tray** - The widget lives in the system tray; closing the widget hides it to the tray. **Hide** and **Exit** are available in the widget's context menu; the tray menu has **Exit**.
 
 ## Building
 
@@ -71,7 +74,7 @@ Settings file: `OpenCodeCostMeter.settings.json` next to the exe. Delete to rese
 src/
 ├─ Data/                         # Database access
 ├─ Models/                       # Data models
-├─ Services/                     # Polling and settings persistence
+├─ Services/                     # Polling, settings persistence, and tray icon
 ├─ ViewModels/                    # UI binding logic
 ├─ Converters/                   # WPF value converters (BoolToVisibility, BoolToDouble, BoolToBrush)
 ├─ FormatUtil.cs                 # Number/currency formatting

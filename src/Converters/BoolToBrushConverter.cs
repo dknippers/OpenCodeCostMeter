@@ -5,8 +5,8 @@ namespace OpenCodeCostMeter.Converters;
 
 public sealed class BoolToBrushConverter : IValueConverter
 {
-    public Brush TrueBrush { get; set; } = new SolidColorBrush(Color.FromRgb(0x4C, 0xE3, 0x8B));
-    public Brush FalseBrush { get; set; } = new SolidColorBrush(Color.FromRgb(0x77, 0x77, 0x77));
+    public System.Windows.Media.Brush TrueBrush { get; set; } = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x4C, 0xE3, 0x8B));
+    public System.Windows.Media.Brush FalseBrush { get; set; } = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x77, 0x77, 0x77));
 
     public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
     {

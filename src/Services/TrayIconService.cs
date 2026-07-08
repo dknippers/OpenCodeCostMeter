@@ -1,0 +1,53 @@
+using System.Drawing;
+using System.Windows;
+using Forms = System.Windows.Forms;
+
+namespace OpenCodeCostMeter.Services;
+
+public sealed class TrayIconService : IDisposable
+{
+    private readonly Window _mainWindow;
+    private readonly Forms.NotifyIcon _notifyIcon;
+
+    public TrayIconService(Window mainWindow, string tooltip, Action exitApplication)
+    {
+        _mainWindow = mainWindow;
+
+        var exitItem = new Forms.ToolStripMenuItem("Exit");
+        exitItem.Click += (_, _) => exitApplication();
+
+        var menu = new Forms.ContextMenuStrip();
+        menu.Items.Add(exitItem);
+
+        // Placeholder icon until a custom application icon is available.
+        var placeholder = new Icon(SystemIcons.Application, 16, 16);
+
+        _notifyIcon = new Forms.NotifyIcon
+        {
+            Text = tooltip,
+            Icon = placeholder,
+            Visible = true,
+            ContextMenuStrip = menu
+        };
+        _notifyIcon.DoubleClick += OnIconDoubleClick;
+    }
+
+    public void Dispose()
+    {
+        _notifyIcon.Visible = false;
+        _notifyIcon.Dispose();
+    }
+
+    private void OnIconDoubleClick(object? sender, EventArgs e)
+    {
+        if (_mainWindow.IsVisible)
+        {
+            _mainWindow.Hide();
+        }
+        else
+        {
+            _mainWindow.Show();
+            _mainWindow.Activate();
+        }
+    }
+}
