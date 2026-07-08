@@ -214,7 +214,7 @@ public partial class MainWindow : Window
         exitItem.Click += (_, _) =>
         {
             IsExitRequested = true;
-            Close();
+            System.Windows.Application.Current.Shutdown();
         };
         menu.Items.Add(exitItem);
 

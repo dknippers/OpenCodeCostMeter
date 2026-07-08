@@ -60,7 +60,6 @@ public partial class App : System.Windows.Application
             Settings = _settings
         };
         _window.SettingsChanged += OnSettingsChanged;
-        _window.Closed += OnWindowClosed;
 
         ShowWindow();
 
@@ -95,7 +94,7 @@ public partial class App : System.Windows.Application
         _store.Save(_settings);
     }
 
-    private void OnWindowClosed(object? sender, EventArgs e)
+    protected override void OnExit(ExitEventArgs e)
     {
         try
         {
@@ -110,6 +109,8 @@ public partial class App : System.Windows.Application
         {
             // best-effort
         }
+
+        base.OnExit(e);
     }
 
     private static LaunchOptions ParseArgs(string[] args)
