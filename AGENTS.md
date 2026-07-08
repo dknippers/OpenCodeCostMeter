@@ -32,7 +32,7 @@ Key details about the schema:
 ### Services (`Services/`)
 - **UsagePoller** - DispatcherTimer-based poller that calls the repo and fires Updated/Error events. Implements `IDisposable`. Has an `_inFlight` guard to prevent overlapping queries if a poll takes longer than the interval.
 - **SettingsStore** - Persists/loads WidgetSettings to JSON file next to the exe
-- **TrayIconService** - Wraps a Windows Forms `NotifyIcon`. Double-clicking the tray icon toggles widget visibility; the context menu has **Exit**. Closing the widget window hides it to the tray; only **Exit** terminates the application.
+- **TrayIconService** - Wraps a Windows Forms `NotifyIcon`. Double-clicking the tray icon toggles widget visibility; the context menu has **Exit**. Loads the embedded `Assets/icon.ico`. Closing the widget window hides it to the tray; only **Exit** terminates the application.
 
 ### ViewModels (`ViewModels/`)
 - **WidgetViewModel** - Main VM; binds to the UI, tracks cost deltas for highlighting, manages ModelRows collection
@@ -59,6 +59,14 @@ dotnet build src\OpenCodeCostMeter.csproj
 
 Output: `src\bin\Debug\net10.0-windows\OpenCodeCostMeter.exe`
 
+## Icon
+
+The application and tray icon are generated from `src/Assets/icon.svg`. To regenerate `src/Assets/icon.ico` after editing the SVG:
+
+```powershell
+uv run --python 3.12 src/Assets/generate-icon.py
+```
+
 ## Command-line options
 
 - `--db-path <path>` - Use an alternative `opencode.db` location instead of the default `%USERPROFILE%\.local\share\opencode\opencode.db`.
@@ -72,13 +80,14 @@ Settings file: `OpenCodeCostMeter.settings.json` next to the exe. Delete to rese
 
 ```
 src/
-├─ Data/                         # Database access
-├─ Models/                       # Data models
-├─ Services/                     # Polling, settings persistence, and tray icon
+├─ Assets/                        # Application icon source (SVG), ICO, and generation script
+├─ Data/                          # Database access
+├─ Models/                        # Data models
+├─ Services/                      # Polling, settings persistence, and tray icon
 ├─ ViewModels/                    # UI binding logic
-├─ Converters/                   # WPF value converters (BoolToVisibility, BoolToDouble, BoolToBrush)
-├─ FormatUtil.cs                 # Number/currency formatting
-├─ MainWindow.xaml/.cs           # Borderless topmost widget window
+├─ Converters/                    # WPF value converters (BoolToVisibility, BoolToDouble, BoolToBrush)
+├─ FormatUtil.cs                  # Number/currency formatting
+├─ MainWindow.xaml/.cs            # Borderless topmost widget window
 ├─ App.xaml/.cs                   # Application bootstrap
-└─ OpenCodeCostMeter.csproj      # Project file
+└─ OpenCodeCostMeter.csproj       # Project file
 ```

@@ -19,17 +19,29 @@ public sealed class TrayIconService : IDisposable
         var menu = new Forms.ContextMenuStrip();
         menu.Items.Add(exitItem);
 
-        // Placeholder icon until a custom application icon is available.
-        var placeholder = new Icon(SystemIcons.Application, 16, 16);
+        var icon = LoadIcon();
 
         _notifyIcon = new Forms.NotifyIcon
         {
             Text = tooltip,
-            Icon = placeholder,
+            Icon = icon,
             Visible = true,
             ContextMenuStrip = menu
         };
         _notifyIcon.DoubleClick += OnIconDoubleClick;
+    }
+
+    private static Icon LoadIcon()
+    {
+        const string iconUri = "pack://application:,,,/Assets/icon.ico";
+        var streamInfo = System.Windows.Application.GetResourceStream(new Uri(iconUri));
+        if (streamInfo != null)
+        {
+            return new Icon(streamInfo.Stream);
+        }
+
+        // Fallback if the embedded icon is missing.
+        return new Icon(SystemIcons.Application, 16, 16);
     }
 
     public void Dispose()

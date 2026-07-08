@@ -7,6 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
     <AssemblyTitle>OpenCode Cost Meter</AssemblyTitle>
     <AssemblyProduct>OpenCode Cost Meter</AssemblyProduct>
     <NoWarn>$(NoWarn);NU1903</NoWarn>
@@ -23,6 +24,9 @@
     <None Update="model-display-names.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Assets\generate-icon.py" />
+    <None Include="Assets\icon.svg" />
+    <Resource Include="Assets\icon.ico" />
   </ItemGroup>
 
 </Project>
