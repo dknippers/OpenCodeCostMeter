@@ -35,6 +35,7 @@ Key details about the schema:
 
 - **UsagePoller** - DispatcherTimer-based poller that calls the repo and fires Updated/Error events. Implements `IDisposable`. Has an `_inFlight` guard to prevent overlapping queries if a poll takes longer than the interval.
 - **SettingsStore** - Persists/loads WidgetSettings to JSON file next to the exe
+- **ModelDisplayNameRules** - Formats raw model IDs (e.g. `claude-sonnet-4-20250514`) into human-readable display names. Applies title-case by default, then runs prefix-based replacement rules loaded from `model-display-names.txt` (next to the exe). Results are cached in a `ConcurrentDictionary`.
 - **TrayIconService** - Wraps a Windows Forms `NotifyIcon`. Double-clicking the tray icon toggles widget visibility; the context menu has **Exit**. Loads the embedded `Assets/icon.ico`. Closing the widget window hides it to the tray; only **Exit** terminates the application.
 
 ### ViewModels (`ViewModels/`)
@@ -55,6 +56,7 @@ Key details about the schema:
 3. **Non-blocking UI** - Slow queries don't freeze the UI; last known values stay on screen during refresh
 4. **Cost delta highlighting** - New spend since last poll is highlighted briefly
 5. **System tray** - The widget lives in the system tray; closing the widget hides it to the tray. **Hide** and **Exit** are available in the widget's context menu; the tray menu has **Exit**.
+6. **Settings debounce** - Slider drags (poll interval, opacity) update visuals immediately but debounce the disk write by 500ms via a `DispatcherTimer` in `MainWindow`, so `SettingsStore.Save()` fires once after the user stops dragging.
 
 ## Building
 
@@ -81,6 +83,10 @@ uv run --python 3.12 src/Assets/generate-icon.py
 
 Settings file: `OpenCodeCostMeter.settings.json` next to the exe. Delete to reset defaults.
 
+## Model Display Names
+
+Rules file: `model-display-names.txt` next to the exe. Each line is `prefix|find1=replace1;find2=replace2`. Prefix `*` matches all models. Lines starting with `#` are comments.
+
 ## Project Structure
 
 ```
@@ -93,5 +99,6 @@ src/
 ├─ Converters/                    # WPF value converters (BoolToVisibility, BoolToDouble, BoolToBrush)
 ├─ MainWindow.xaml/.cs            # Borderless topmost widget window
 ├─ App.xaml/.cs                   # Application bootstrap
+├─ model-display-names.txt        # Display name formatting rules (copied to output)
 └─ OpenCodeCostMeter.csproj       # Project file
 ```
