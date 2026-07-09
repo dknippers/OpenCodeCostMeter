@@ -235,7 +235,7 @@
                 <!-- Usage Details Toggle -->
                 <Button x:Name="ToggleButton"
                             Visibility="Collapsed"
-                            Margin="0,4,0,0"
+                            Margin="0,8,0,0"
                             HorizontalAlignment="Center"
                             Style="{StaticResource ModelCostBtn}"
                             Command="{Binding ToggleBreakdownCommand}">
