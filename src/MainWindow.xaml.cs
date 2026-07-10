@@ -2,10 +2,8 @@ using OpenCodeCostMeter.Models;
 using OpenCodeCostMeter.ViewModels;
 using System.ComponentModel;
 using System.Windows;
-using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace OpenCodeCostMeter;
@@ -133,13 +131,17 @@ public partial class MainWindow : Window
         if (e.PreviousSize.Width == 0 || e.PreviousSize.Height == 0)
             return;
 
-        var dw = e.NewSize.Width - e.PreviousSize.Width;
-        var dh = e.NewSize.Height - e.PreviousSize.Height;
+        // Use previous dimensions because ActualWidth/Height already reflect the new size.
+        var width = e.PreviousSize.Width;
+        var height = e.PreviousSize.Height;
+
+        var dw = e.NewSize.Width - width;
+        var dh = e.NewSize.Height - height;
         if (dw == 0 && dh == 0)
             return;
 
         var screen = Screen.FromHandle(new WindowInteropHelper(this).Handle);
-        var screenCenter = new System.Windows.Point(
+        var screenCenterDevice = new System.Windows.Point(
             screen.WorkingArea.X + screen.WorkingArea.Width / 2.0,
             screen.WorkingArea.Y + screen.WorkingArea.Height / 2.0);
 
@@ -149,11 +151,22 @@ public partial class MainWindow : Window
 
         var toDevice = source.CompositionTarget.TransformToDevice;
         var windowCenterDevice = toDevice.Transform(
-            new System.Windows.Point(Left + ActualWidth / 2, Top + ActualHeight / 2));
+            new System.Windows.Point(Left + width / 2, Top + height / 2));
 
-        if (windowCenterDevice.X >= screenCenter.X)
+        var toDIP = source.CompositionTarget.TransformFromDevice;
+        var screenCenterDIP = toDIP.Transform(screenCenterDevice);
+
+        bool spansCenterX = Left <= screenCenterDIP.X && (Left + width) >= screenCenterDIP.X;
+        bool spansCenterY = Top <= screenCenterDIP.Y && (Top + height) >= screenCenterDIP.Y;
+
+        if (spansCenterX)
+            Left -= dw / 2;
+        else if (windowCenterDevice.X >= screenCenterDevice.X)
             Left -= dw;
-        if (windowCenterDevice.Y >= screenCenter.Y)
+
+        if (spansCenterY)
+            Top -= dh / 2;
+        else if (windowCenterDevice.Y >= screenCenterDevice.Y)
             Top -= dh;
     }
 
