@@ -16,8 +16,8 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _saveDebounce;
 
     private System.Windows.Point _dragStartPosition;
-    private DateTime _dragStartTime;
     private bool _isDragging;
+    private bool _isTogglingBreakdown;
 
     public bool IsExitRequested { get; set; }
 
@@ -80,7 +80,6 @@ public partial class MainWindow : Window
         if (e.ButtonState == MouseButtonState.Pressed)
         {
             _dragStartPosition = e.GetPosition(this);
-            _dragStartTime = DateTime.Now;
             _isDragging = false;
 
             var border = (System.Windows.Controls.Border)sender;
@@ -96,15 +95,17 @@ public partial class MainWindow : Window
         if (e.LeftButton != MouseButtonState.Pressed) return;
 
         var pos = e.GetPosition(this);
-        var offset = pos - _dragStartPosition;
-        var distance = Math.Sqrt(offset.X * offset.X + offset.Y * offset.Y);
+        var dx = Math.Abs(pos.X - _dragStartPosition.X);
+        var dy = Math.Abs(pos.Y - _dragStartPosition.Y);
 
-        if (distance > 4)
+        if (dx > SystemParameters.MinimumHorizontalDragDistance ||
+            dy > SystemParameters.MinimumVerticalDragDistance)
         {
             _isDragging = true;
             var border = (System.Windows.Controls.Border)sender;
             border.ReleaseMouseCapture();
             DragMove();
+            SnapToEdgeIfOutOfBounds();
         }
     }
 
@@ -114,11 +115,9 @@ public partial class MainWindow : Window
 
         if (!_isDragging)
         {
-            var duration = DateTime.Now - _dragStartTime;
-            if (duration < TimeSpan.FromMilliseconds(400))
-            {
-                ViewModel.ToggleBreakdownCommand.Execute(null);
-            }
+            _isTogglingBreakdown = true;
+            ViewModel.ToggleBreakdownCommand.Execute(null);
+            Dispatcher.BeginInvoke(() => _isTogglingBreakdown = false, DispatcherPriority.Background);
         }
 
         _isDragging = false;
@@ -126,10 +125,67 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
+    internal void SnapToEdgeIfOutOfBounds()
+    {
+        var screen = Screen.FromHandle(new WindowInteropHelper(this).Handle);
+
+        var source = PresentationSource.FromVisual(this);
+        if (source?.CompositionTarget == null)
+            return;
+
+        var toDIP = source.CompositionTarget.TransformFromDevice;
+        var boundsTopLeft = toDIP.Transform(new System.Windows.Point(screen.Bounds.X, screen.Bounds.Y));
+        var boundsBottomRight = toDIP.Transform(new System.Windows.Point(
+            screen.Bounds.X + screen.Bounds.Width,
+            screen.Bounds.Y + screen.Bounds.Height));
+        var bounds = new Rect(boundsTopLeft, boundsBottomRight);
+
+        double left = Left;
+        double top = Top;
+        bool changed = false;
+
+        if (left < bounds.Left)
+        {
+            left = bounds.Left;
+            changed = true;
+        }
+        else if (left + ActualWidth > bounds.Right)
+        {
+            left = bounds.Right - ActualWidth;
+            if (left < bounds.Left)
+                left = bounds.Left;
+            changed = true;
+        }
+
+        if (top < bounds.Top)
+        {
+            top = bounds.Top;
+            changed = true;
+        }
+        else if (top + ActualHeight > bounds.Bottom)
+        {
+            top = bounds.Bottom - ActualHeight;
+            if (top < bounds.Top)
+                top = bounds.Top;
+            changed = true;
+        }
+
+        if (changed)
+        {
+            Left = left;
+            Top = top;
+        }
+    }
+
     private void OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
         if (e.PreviousSize.Width == 0 || e.PreviousSize.Height == 0)
             return;
+
+        if (!_isTogglingBreakdown)
+            return;
+
+        _isTogglingBreakdown = false;
 
         // Use previous dimensions because ActualWidth/Height already reflect the new size.
         var width = e.PreviousSize.Width;

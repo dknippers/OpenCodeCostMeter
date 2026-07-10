@@ -80,9 +80,16 @@ public partial class App : System.Windows.Application
             _window.Left = _settings.X;
             _window.Top = _settings.Y;
         }
+        else
+        {
+            // First launch: center the window on the screen
+            _window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
+
         _window.Topmost = _settings.AlwaysOnTop;
         _window.Opacity = Math.Clamp(_settings.Opacity, 0.05, 1.0);
         _window.Show();
+        _window.SnapToEdgeIfOutOfBounds();
     }
 
     private void OnSettingsChanged(object? sender, EventArgs e)
