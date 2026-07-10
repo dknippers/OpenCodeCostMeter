@@ -46,6 +46,8 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isBreakdownExpanded;
     [ObservableProperty] private bool _hasModels;
 
+    public event EventHandler? FirstResultReceived;
+
     [RelayCommand]
     private void ToggleBreakdown() => IsBreakdownExpanded = !IsBreakdownExpanded;
 
@@ -68,6 +70,7 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
         {
             totalChanged = false;
             _isFirstUpdate = false;
+            FirstResultReceived?.Invoke(this, EventArgs.Empty);
         }
         else
         {
@@ -157,6 +160,11 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
 
     private void OnError(object? sender, Exception ex)
     {
+        if (_isFirstUpdate)
+        {
+            _isFirstUpdate = false;
+            FirstResultReceived?.Invoke(this, EventArgs.Empty);
+        }
         IsRetrying = true;
         LastErrorText = ex is Microsoft.Data.Sqlite.SqliteException
             ? "db locked"

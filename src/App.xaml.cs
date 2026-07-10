@@ -61,7 +61,7 @@ public partial class App : System.Windows.Application
         };
         _window.SettingsChanged += OnSettingsChanged;
 
-        ShowWindow();
+        ApplyWindowPositionAndSettings();
 
         _trayIcon = new TrayIconService(_window, "OpenCode Cost Meter", () =>
         {
@@ -69,10 +69,11 @@ public partial class App : System.Windows.Application
             Shutdown();
         });
 
+        _vm.FirstResultReceived += OnFirstResultReceived;
         _vm.Start();
     }
 
-    private void ShowWindow()
+    private void ApplyWindowPositionAndSettings()
     {
         if (!double.IsNaN(_settings.X) && !double.IsNaN(_settings.Y))
         {
@@ -88,6 +89,11 @@ public partial class App : System.Windows.Application
 
         _window.Topmost = _settings.AlwaysOnTop;
         _window.Opacity = Math.Clamp(_settings.Opacity, 0.05, 1.0);
+    }
+
+    private void OnFirstResultReceived(object? sender, EventArgs e)
+    {
+        _vm.FirstResultReceived -= OnFirstResultReceived;
         _window.Show();
         _window.SnapToEdgeIfOutOfBounds();
     }
