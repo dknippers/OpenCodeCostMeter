@@ -2,20 +2,24 @@ using OpenCodeCostMeter.Models;
 using OpenCodeCostMeter.ViewModels;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace OpenCodeCostMeter;
 
 public partial class MainWindow : Window
 {
-    private static readonly TimeSpan HoverDelay = TimeSpan.FromMilliseconds(100);
     private static readonly TimeSpan SaveDebounceDelay = TimeSpan.FromMilliseconds(500);
 
     private WidgetSettings _settings = new();
-    private readonly DispatcherTimer _hoverTimer;
     private readonly DispatcherTimer _saveDebounce;
-    private bool _hoverShowPending;
+
+    private System.Windows.Point _dragStartPosition;
+    private DateTime _dragStartTime;
+    private bool _isDragging;
 
     public bool IsExitRequested { get; set; }
 
@@ -23,15 +27,10 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        _hoverTimer = new DispatcherTimer { Interval = HoverDelay };
-        _hoverTimer.Tick += (_, _) =>
-        {
-            _hoverTimer.Stop();
-            if (_hoverShowPending)
-                ToggleButton.Visibility = Visibility.Visible;
-            else
-                ToggleButton.Visibility = Visibility.Collapsed;
-        };
+        var border = (System.Windows.Controls.Border)Content;
+        border.MouseMove += OnCardMouseMove;
+        border.MouseLeftButtonUp += OnCardMouseLeftButtonUp;
+        SizeChanged += OnSizeChanged;
 
         _saveDebounce = new DispatcherTimer { Interval = SaveDebounceDelay };
         _saveDebounce.Tick += (_, _) =>
@@ -82,9 +81,80 @@ public partial class MainWindow : Window
     {
         if (e.ButtonState == MouseButtonState.Pressed)
         {
-            DragMove();
+            _dragStartPosition = e.GetPosition(this);
+            _dragStartTime = DateTime.Now;
+            _isDragging = false;
+
+            var border = (System.Windows.Controls.Border)sender;
+            border.CaptureMouse();
+
             e.Handled = true;
         }
+    }
+
+    private void OnCardMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (_isDragging) return;
+        if (e.LeftButton != MouseButtonState.Pressed) return;
+
+        var pos = e.GetPosition(this);
+        var offset = pos - _dragStartPosition;
+        var distance = Math.Sqrt(offset.X * offset.X + offset.Y * offset.Y);
+
+        if (distance > 4)
+        {
+            _isDragging = true;
+            var border = (System.Windows.Controls.Border)sender;
+            border.ReleaseMouseCapture();
+            DragMove();
+        }
+    }
+
+    private void OnCardMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        var border = (System.Windows.Controls.Border)sender;
+
+        if (!_isDragging)
+        {
+            var duration = DateTime.Now - _dragStartTime;
+            if (duration < TimeSpan.FromMilliseconds(400))
+            {
+                ViewModel.ToggleBreakdownCommand.Execute(null);
+            }
+        }
+
+        _isDragging = false;
+        border.ReleaseMouseCapture();
+        e.Handled = true;
+    }
+
+    private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (e.PreviousSize.Width == 0 || e.PreviousSize.Height == 0)
+            return;
+
+        var dw = e.NewSize.Width - e.PreviousSize.Width;
+        var dh = e.NewSize.Height - e.PreviousSize.Height;
+        if (dw == 0 && dh == 0)
+            return;
+
+        var screen = Screen.FromHandle(new WindowInteropHelper(this).Handle);
+        var screenCenter = new System.Windows.Point(
+            screen.WorkingArea.X + screen.WorkingArea.Width / 2.0,
+            screen.WorkingArea.Y + screen.WorkingArea.Height / 2.0);
+
+        var source = PresentationSource.FromVisual(this);
+        if (source?.CompositionTarget == null)
+            return;
+
+        var toDevice = source.CompositionTarget.TransformToDevice;
+        var windowCenterDevice = toDevice.Transform(
+            new System.Windows.Point(Left + ActualWidth / 2, Top + ActualHeight / 2));
+
+        if (windowCenterDevice.X >= screenCenter.X)
+            Left -= dw;
+        if (windowCenterDevice.Y >= screenCenter.Y)
+            Top -= dh;
     }
 
     private void OnCardMouseRightButtonUp(object sender, MouseButtonEventArgs e)
@@ -94,20 +164,6 @@ public partial class MainWindow : Window
         menu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
         menu.IsOpen = true;
         e.Handled = true;
-    }
-
-    private void OnCardMouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
-    {
-        _hoverTimer.Stop();
-        _hoverShowPending = true;
-        _hoverTimer.Start();
-    }
-
-    private void OnCardMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
-    {
-        _hoverTimer.Stop();
-        _hoverShowPending = false;
-        _hoverTimer.Start();
     }
 
     private System.Windows.Controls.ContextMenu BuildMenu()

@@ -46,10 +46,6 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool _isBreakdownExpanded;
     [ObservableProperty] private bool _hasModels;
 
-    public string BreakdownToggleText => IsBreakdownExpanded ? "less" : "more";
-
-    partial void OnIsBreakdownExpandedChanged(bool value) => OnPropertyChanged(nameof(BreakdownToggleText));
-
     [RelayCommand]
     private void ToggleBreakdown() => IsBreakdownExpanded = !IsBreakdownExpanded;
 

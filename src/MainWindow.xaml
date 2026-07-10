@@ -23,7 +23,6 @@
         <SolidColorBrush x:Key="Secondary" Color="#61DBB4"/>
         <SolidColorBrush x:Key="RowHover" Color="#2A2A2A"/>
         <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
-        <conv:BoolToDoubleConverter x:Key="ExpandAngle" TrueValue="180" FalseValue="0"/>
         <conv:BoolToBrushConverter x:Key="AmountHighlightBrush" TrueBrush="{StaticResource Secondary}" FalseBrush="{StaticResource OnSurface}"/>
         <conv:BoolToBrushConverter x:Key="ModelCostHighlightBrush" TrueBrush="{StaticResource Secondary}" FalseBrush="{StaticResource OnSurfaceVariant}"/>
         <FontFamily x:Key="UiFont">Segoe UI Variable, Segoe UI</FontFamily>
@@ -83,32 +82,6 @@
             </Setter>
         </Style>
 
-        <Style x:Key="ModelCostBtn" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="{StaticResource OnSurface}"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Padding" Value="8,4"/>
-            <Setter Property="FontFamily" Value="{StaticResource UiFont}"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="0" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource RowHover}"/>
-                                <Setter Property="Foreground" Value="{StaticResource OnSurface}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
 
     <Border CornerRadius="6"
@@ -116,11 +89,9 @@
             BorderBrush="{StaticResource MicaStroke}"
             BorderThickness="1"
             MouseLeftButtonDown="OnCardMouseLeftButtonDown"
-            MouseRightButtonUp="OnCardMouseRightButtonUp"
-            MouseEnter="OnCardMouseEnter"
-            MouseLeave="OnCardMouseLeave">
+            MouseRightButtonUp="OnCardMouseRightButtonUp">
         <Border.ContextMenu>
-            <ContextMenu x:Name="CardMenu"/>
+            <ContextMenu/>
         </Border.ContextMenu>
         <StackPanel Margin="20,12">
 
@@ -131,36 +102,8 @@
 
             <StackPanel Visibility="{Binding HasModels, Converter={StaticResource BoolToVis}}">
                 <!-- Breakdown List -->
-                <Border x:Name="BreakdownContainer" ClipToBounds="True" Visibility="Collapsed" MaxHeight="600" Opacity="0" Padding="0">
-                    <Border.Style>
-                        <Style TargetType="Border">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsBreakdownExpanded}" Value="True">
-                                    <DataTrigger.EnterActions>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
-                                                </ObjectAnimationUsingKeyFrames>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.05"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </DataTrigger.EnterActions>
-                                    <DataTrigger.ExitActions>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.05"/>
-                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility">
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:0.05" Value="{x:Static Visibility.Collapsed}"/>
-                                                </ObjectAnimationUsingKeyFrames>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </DataTrigger.ExitActions>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
+                <Border ClipToBounds="True" MaxHeight="600" Padding="0"
+                        Visibility="{Binding IsBreakdownExpanded, Converter={StaticResource BoolToVis}}">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
                         <ScrollViewer.Resources>
                             <Style TargetType="ScrollBar">
@@ -187,7 +130,7 @@
                                 </Setter>
                             </Style>
                         </ScrollViewer.Resources>
-                        <ItemsControl ItemsSource="{Binding ModelRows}" Margin="0,10,0,0" Visibility="{Binding IsBreakdownExpanded, Converter={StaticResource BoolToVis}}" FocusVisualStyle="{x:Null}" Focusable="False">
+                        <ItemsControl ItemsSource="{Binding ModelRows}" Margin="0,10,0,0" FocusVisualStyle="{x:Null}" Focusable="False">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate DataType="{x:Type vm:ModelRowViewModel}">
                                     <Border CornerRadius="0" Padding="8,6" Margin="0" Background="Transparent">
@@ -218,28 +161,6 @@
                     </ScrollViewer>
                 </Border>
 
-                <!-- Usage Details Toggle -->
-                <Button x:Name="ToggleButton"
-                            Visibility="Collapsed"
-                            Margin="0,8,0,0"
-                            HorizontalAlignment="Center"
-                            Style="{StaticResource ModelCostBtn}"
-                            Command="{Binding ToggleBreakdownCommand}">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding BreakdownToggleText}" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <Path Width="8" Height="8" Stretch="Uniform" Margin="0,2,0,0"
-                                  Data="M19 9l-7 7-7-7"
-                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                  StrokeThickness="2.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
-                                  Fill="Transparent"
-                                  RenderTransformOrigin="0.5,0.5"
-                                  VerticalAlignment="Center">
-                            <Path.RenderTransform>
-                                <RotateTransform Angle="{Binding IsBreakdownExpanded, Converter={StaticResource ExpandAngle}}"/>
-                            </Path.RenderTransform>
-                        </Path>
-                    </StackPanel>
-                </Button>
             </StackPanel>
 
             <!-- Retry indicator -->
