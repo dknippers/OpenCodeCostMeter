@@ -17,7 +17,6 @@ public partial class MainWindow : Window
 
     private System.Windows.Point _dragStartPosition;
     private bool _isDragging;
-    private bool _isTogglingBreakdown;
 
     public bool IsExitRequested { get; set; }
 
@@ -115,9 +114,7 @@ public partial class MainWindow : Window
 
         if (!_isDragging)
         {
-            _isTogglingBreakdown = true;
             ViewModel.ToggleBreakdownCommand.Execute(null);
-            Dispatcher.BeginInvoke(() => _isTogglingBreakdown = false, DispatcherPriority.Background);
         }
 
         _isDragging = false;
@@ -181,11 +178,6 @@ public partial class MainWindow : Window
     {
         if (e.PreviousSize.Width == 0 || e.PreviousSize.Height == 0)
             return;
-
-        if (!_isTogglingBreakdown)
-            return;
-
-        _isTogglingBreakdown = false;
 
         // Use previous dimensions because ActualWidth/Height already reflect the new size.
         var width = e.PreviousSize.Width;
