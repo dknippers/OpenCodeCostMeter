@@ -39,12 +39,23 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
         }
     }
 
-    [ObservableProperty] private string _todayCostText = "$0.00";
-    [ObservableProperty] private bool _isTodayCostHighlighted;
-    [ObservableProperty] private bool _isRetrying;
-    [ObservableProperty] private string _lastErrorText = "";
-    [ObservableProperty] private bool _isBreakdownExpanded;
-    [ObservableProperty] private bool _hasModels;
+    [ObservableProperty]
+    public partial string TodayCostText { get; set; } = "$0.00";
+
+    [ObservableProperty]
+    public partial bool IsTodayCostHighlighted { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsRetrying { get; set; }
+
+    [ObservableProperty]
+    public partial string LastErrorText { get; set; } = "";
+
+    [ObservableProperty]
+    public partial bool IsBreakdownExpanded { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasModels { get; set; }
 
     public event EventHandler? FirstResultReceived;
 
@@ -53,11 +64,11 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
 
     private string _lastCostText = "$0.00";
     private bool _isFirstUpdate = true;
-    private Dictionary<string, string> _lastModelCostTexts = new();
-    private readonly Dictionary<string, ModelRowViewModel> _rowsByKey = new();
+    private Dictionary<string, string> _lastModelCostTexts = [];
+    private readonly Dictionary<string, ModelRowViewModel> _rowsByKey = [];
 
     [ObservableProperty]
-    private ObservableCollection<ModelRowViewModel> _modelRows = new();
+    public partial ObservableCollection<ModelRowViewModel> ModelRows { get; set; } = [];
 
     public void Start() => _poller.Start();
     public void SetInterval(double s) => _poller.SetInterval(s);
@@ -196,5 +207,6 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
         _highlightTimer.Stop();
         _highlightTimer.Tick -= OnHighlightTimerTick;
         Detach();
+        GC.SuppressFinalize(this);
     }
 }
