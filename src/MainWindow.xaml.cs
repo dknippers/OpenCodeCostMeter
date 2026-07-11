@@ -15,7 +15,7 @@ public partial class MainWindow : Window
     private WidgetSettings _settings = new();
     private readonly DispatcherTimer _saveDebounce;
 
-    private System.Windows.Point _dragStartPosition;
+    private System.Windows.Point? _dragStartPosition;
     private bool _isDragging;
 
     public bool IsExitRequested { get; set; }
@@ -79,7 +79,6 @@ public partial class MainWindow : Window
         if (e.ButtonState == MouseButtonState.Pressed)
         {
             _dragStartPosition = e.GetPosition(this);
-            _isDragging = false;
 
             var border = (System.Windows.Controls.Border)sender;
             border.CaptureMouse();
@@ -90,12 +89,16 @@ public partial class MainWindow : Window
 
     private void OnCardMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
     {
-        if (_isDragging) return;
-        if (e.LeftButton != MouseButtonState.Pressed) return;
+        if (_isDragging ||
+            e.LeftButton != MouseButtonState.Pressed ||
+            _dragStartPosition is null)
+        {
+            return;
+        }
 
         var pos = e.GetPosition(this);
-        var dx = Math.Abs(pos.X - _dragStartPosition.X);
-        var dy = Math.Abs(pos.Y - _dragStartPosition.Y);
+        var dx = Math.Abs(pos.X - _dragStartPosition.Value.X);
+        var dy = Math.Abs(pos.Y - _dragStartPosition.Value.Y);
 
         if (dx > SystemParameters.MinimumHorizontalDragDistance ||
             dy > SystemParameters.MinimumVerticalDragDistance)
@@ -104,20 +107,23 @@ public partial class MainWindow : Window
             var border = (System.Windows.Controls.Border)sender;
             border.ReleaseMouseCapture();
             DragMove();
+            _isDragging = false;
+            _dragStartPosition = null;
             SnapToEdgeIfOutOfBounds();
         }
     }
 
     private void OnCardMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-        var border = (System.Windows.Controls.Border)sender;
-
         if (!_isDragging)
         {
             ViewModel.ToggleBreakdownCommand.Execute(null);
         }
 
         _isDragging = false;
+        _dragStartPosition = null;
+
+        var border = (System.Windows.Controls.Border)sender;
         border.ReleaseMouseCapture();
         e.Handled = true;
     }
