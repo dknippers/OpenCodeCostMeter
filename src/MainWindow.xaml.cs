@@ -137,10 +137,10 @@ public partial class MainWindow : Window
             return;
 
         var toDIP = source.CompositionTarget.TransformFromDevice;
-        var boundsTopLeft = toDIP.Transform(new System.Windows.Point(screen.Bounds.X, screen.Bounds.Y));
+        var boundsTopLeft = toDIP.Transform(new System.Windows.Point(screen.WorkingArea.X, screen.WorkingArea.Y));
         var boundsBottomRight = toDIP.Transform(new System.Windows.Point(
-            screen.Bounds.X + screen.Bounds.Width,
-            screen.Bounds.Y + screen.Bounds.Height));
+            screen.WorkingArea.X + screen.WorkingArea.Width,
+            screen.WorkingArea.Y + screen.WorkingArea.Height));
         var bounds = new Rect(boundsTopLeft, boundsBottomRight);
 
         double left = Left;
