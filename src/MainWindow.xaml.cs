@@ -17,6 +17,19 @@ public partial class MainWindow : Window
 
     private System.Windows.Point? _dragStartPosition;
     private bool _isDragging;
+    private ResizeAnchorFlags? _previousResizeAnchor;
+
+    [Flags]
+    private enum ResizeAnchorFlags
+    {
+        None = 0,
+        SpansX = 1,
+        SpansY = 2,
+        TopLeftQuadrant = 4,
+        TopRightQuadrant = 8,
+        BottomRightQuadrant = 16,
+        BottomLeftQuadrant = 32
+    }
 
     public bool IsExitRequested { get; set; }
 
@@ -109,6 +122,7 @@ public partial class MainWindow : Window
             DragMove();
             _isDragging = false;
             _dragStartPosition = null;
+            _previousResizeAnchor = null;
             SnapToEdgeIfOutOfBounds();
         }
     }
@@ -239,25 +253,63 @@ public partial class MainWindow : Window
         if (source?.CompositionTarget == null)
             return;
 
-        var toDevice = source.CompositionTarget.TransformToDevice;
-        var windowCenterDevice = toDevice.Transform(
-            new System.Windows.Point(Left + width / 2, Top + height / 2));
-
         var toDIP = source.CompositionTarget.TransformFromDevice;
         var screenCenterDIP = toDIP.Transform(screenCenterDevice);
 
-        bool spansCenterX = Left <= screenCenterDIP.X && (Left + width) >= screenCenterDIP.X;
-        bool spansCenterY = Top <= screenCenterDIP.Y && (Top + height) >= screenCenterDIP.Y;
+        ResizeAnchorFlags flags;
 
-        if (spansCenterX)
+        if (_previousResizeAnchor.HasValue)
+        {
+            flags = _previousResizeAnchor.Value;
+            _previousResizeAnchor = null;
+        }
+        else
+        {
+            flags = ComputeResizeAnchorFlags(Left, Top, width, height, screenCenterDIP);
+            _previousResizeAnchor = flags;
+        }
+
+        if (flags.HasFlag(ResizeAnchorFlags.SpansX))
             Left -= dw / 2;
-        else if (windowCenterDevice.X >= screenCenterDevice.X)
+        else if (flags.HasFlag(ResizeAnchorFlags.TopRightQuadrant) ||
+                 flags.HasFlag(ResizeAnchorFlags.BottomRightQuadrant))
             Left -= dw;
 
-        if (spansCenterY)
+        if (flags.HasFlag(ResizeAnchorFlags.SpansY))
             Top -= dh / 2;
-        else if (windowCenterDevice.Y >= screenCenterDevice.Y)
+        else if (flags.HasFlag(ResizeAnchorFlags.BottomLeftQuadrant) ||
+                 flags.HasFlag(ResizeAnchorFlags.BottomRightQuadrant))
             Top -= dh;
+    }
+
+    private static ResizeAnchorFlags ComputeResizeAnchorFlags(
+        double left, double top, double width, double height, System.Windows.Point screenCenter)
+    {
+        var flags = ResizeAnchorFlags.None;
+
+        bool spansCenterX = left <= screenCenter.X && (left + width) >= screenCenter.X;
+        bool spansCenterY = top <= screenCenter.Y && (top + height) >= screenCenter.Y;
+
+        if (spansCenterX)
+            flags |= ResizeAnchorFlags.SpansX;
+        if (spansCenterY)
+            flags |= ResizeAnchorFlags.SpansY;
+
+        bool inLeft = left < screenCenter.X;
+        bool inRight = (left + width) > screenCenter.X;
+        bool inTop = top < screenCenter.Y;
+        bool inBottom = (top + height) > screenCenter.Y;
+
+        if (inLeft && inTop)
+            flags |= ResizeAnchorFlags.TopLeftQuadrant;
+        if (inRight && inTop)
+            flags |= ResizeAnchorFlags.TopRightQuadrant;
+        if (inRight && inBottom)
+            flags |= ResizeAnchorFlags.BottomRightQuadrant;
+        if (inLeft && inBottom)
+            flags |= ResizeAnchorFlags.BottomLeftQuadrant;
+
+        return flags;
     }
 
     private void OnCardMouseRightButtonUp(object sender, MouseButtonEventArgs e)
@@ -357,11 +409,19 @@ public partial class MainWindow : Window
         menu.Items.Add(opacitySliderItem);
 
         var centerHorizItem = new System.Windows.Controls.MenuItem { Header = "Center horizontally", Style = itemStyle };
-        centerHorizItem.Click += (_, _) => CenterHorizontally();
+        centerHorizItem.Click += (_, _) =>
+        {
+            _previousResizeAnchor = null;
+            CenterHorizontally();
+        };
         menu.Items.Add(centerHorizItem);
 
         var centerVertItem = new System.Windows.Controls.MenuItem { Header = "Center vertically", Style = itemStyle };
-        centerVertItem.Click += (_, _) => CenterVertically();
+        centerVertItem.Click += (_, _) =>
+        {
+            _previousResizeAnchor = null;
+            CenterVertically();
+        };
         menu.Items.Add(centerVertItem);
 
         var hideItem = new System.Windows.Controls.MenuItem { Header = "Hide", Style = itemStyle };
