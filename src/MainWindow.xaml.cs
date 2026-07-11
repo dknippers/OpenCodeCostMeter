@@ -180,6 +180,42 @@ public partial class MainWindow : Window
         }
     }
 
+    private void CenterHorizontally()
+    {
+        var screen = Screen.FromHandle(new WindowInteropHelper(this).Handle);
+
+        var source = PresentationSource.FromVisual(this);
+        if (source?.CompositionTarget == null)
+            return;
+
+        var toDIP = source.CompositionTarget.TransformFromDevice;
+        var boundsTopLeft = toDIP.Transform(new System.Windows.Point(screen.WorkingArea.X, screen.WorkingArea.Y));
+        var boundsBottomRight = toDIP.Transform(new System.Windows.Point(
+            screen.WorkingArea.X + screen.WorkingArea.Width,
+            screen.WorkingArea.Y + screen.WorkingArea.Height));
+        var bounds = new Rect(boundsTopLeft, boundsBottomRight);
+
+        Left = bounds.X + (bounds.Width - ActualWidth) / 2;
+    }
+
+    private void CenterVertically()
+    {
+        var screen = Screen.FromHandle(new WindowInteropHelper(this).Handle);
+
+        var source = PresentationSource.FromVisual(this);
+        if (source?.CompositionTarget == null)
+            return;
+
+        var toDIP = source.CompositionTarget.TransformFromDevice;
+        var boundsTopLeft = toDIP.Transform(new System.Windows.Point(screen.WorkingArea.X, screen.WorkingArea.Y));
+        var boundsBottomRight = toDIP.Transform(new System.Windows.Point(
+            screen.WorkingArea.X + screen.WorkingArea.Width,
+            screen.WorkingArea.Y + screen.WorkingArea.Height));
+        var bounds = new Rect(boundsTopLeft, boundsBottomRight);
+
+        Top = bounds.Y + (bounds.Height - ActualHeight) / 2;
+    }
+
     private void OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
         if (e.PreviousSize.Width == 0 || e.PreviousSize.Height == 0)
@@ -319,6 +355,14 @@ public partial class MainWindow : Window
         opacityPanel.Children.Add(opacityLabel);
         opacitySliderItem.Header = opacityPanel;
         menu.Items.Add(opacitySliderItem);
+
+        var centerHorizItem = new System.Windows.Controls.MenuItem { Header = "Center horizontally", Style = itemStyle };
+        centerHorizItem.Click += (_, _) => CenterHorizontally();
+        menu.Items.Add(centerHorizItem);
+
+        var centerVertItem = new System.Windows.Controls.MenuItem { Header = "Center vertically", Style = itemStyle };
+        centerVertItem.Click += (_, _) => CenterVertically();
+        menu.Items.Add(centerVertItem);
 
         var hideItem = new System.Windows.Controls.MenuItem { Header = "Hide", Style = itemStyle };
         hideItem.Click += (_, _) => Hide();
