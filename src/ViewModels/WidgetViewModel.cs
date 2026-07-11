@@ -114,24 +114,36 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
             row.IsCostHighlighted = newlyHighlighted;
         }
 
-        // Diff ModelRows: only rebuild if the visible key sequence changed.
-        var sameSequence = ModelRows.Count == visibleKeys.Count;
-        for (var i = 0; sameSequence && i < visibleKeys.Count; i++)
-        {
-            if (!ReferenceEquals(ModelRows[i], _rowsByKey[visibleKeys[i]]))
-                sameSequence = false;
-        }
+        // Truncate any surplus rows at the tail.
+        while (ModelRows.Count > visibleKeys.Count)
+            ModelRows.RemoveAt(ModelRows.Count - 1);
 
-        if (!sameSequence && visibleKeys.Count == 0)
+        // In-place diff: emit the minimum number of Move/Insert operations
+        // so WPF's ItemContainerGenerator can reuse containers instead of rebuilding.
+        for (var i = 0; i < visibleKeys.Count; i++)
         {
-            ModelRows.Clear();
-        }
-        else if (!sameSequence)
-        {
-            var newRows = new List<ModelRowViewModel>(visibleKeys.Count);
-            foreach (var key in visibleKeys)
-                newRows.Add(_rowsByKey[key]);
-            ModelRows = new ObservableCollection<ModelRowViewModel>(newRows);
+            var desiredRow = _rowsByKey[visibleKeys[i]];
+            if (i < ModelRows.Count && ReferenceEquals(ModelRows[i], desiredRow))
+                continue;
+
+            if (i < ModelRows.Count)
+            {
+                var currentIndex = -1;
+                for (var j = 0; j < ModelRows.Count; j++)
+                {
+                    if (ReferenceEquals(ModelRows[j], desiredRow))
+                    {
+                        currentIndex = j;
+                        break;
+                    }
+                }
+                if (currentIndex >= 0)
+                {
+                    ModelRows.Move(currentIndex, i);
+                    continue;
+                }
+            }
+            ModelRows.Insert(i, desiredRow);
         }
 
         // Remove stale entries from _rowsByKey (rows no longer in any snapshot).
