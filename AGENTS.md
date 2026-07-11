@@ -57,6 +57,10 @@ Key details about the schema:
 4. **Cost delta highlighting** - New spend since last poll is highlighted briefly
 5. **System tray** - The widget lives in the system tray; closing the widget hides it to the tray. **Hide** and **Exit** are available in the widget's context menu; the tray menu has **Exit**.
 6. **Settings debounce** - Slider drags (poll interval, opacity) update visuals immediately but debounce the disk write by 500ms via a `DispatcherTimer` in `MainWindow`, so `SettingsStore.Save()` fires once after the user stops dragging.
+7. **Delayed window show** - The window stays hidden until the first poll result arrives, avoiding a flash of "$0.00".
+8. **Quadrant-based resize anchoring** - When the widget resizes (e.g. expanding the breakdown list), the window anchors from the corner closest to the screen center so it expands "inward" rather than flying off-screen. `SnapToEdgeIfOutOfBounds()` uses `WorkingArea` (excludes taskbar) rather than `Bounds`.
+9. **In-place ModelRows diff** - `WidgetViewModel` performs a minimal Move/Insert diff on the `ObservableCollection<ModelRowViewModel>` so WPF's `ItemContainerGenerator` can reuse containers instead of rebuilding the entire list each poll.
+10. **Context menu** - Right-clicking the widget shows: Always on top, Poll interval slider, Opacity slider, Center horizontally, Center vertically, Hide, Exit.
 
 ## Building
 
@@ -96,7 +100,7 @@ src/
 ├─ Models/                        # Data models
 ├─ Services/                      # Polling, settings persistence, and tray icon
 ├─ ViewModels/                    # UI binding logic
-├─ Converters/                    # WPF value converters (BoolToVisibility, BoolToDouble, BoolToBrush)
+├─ Converters/                    # WPF value converters (BoolToVisibility, BoolToBrush)
 ├─ MainWindow.xaml/.cs            # Borderless topmost widget window
 ├─ App.xaml/.cs                   # Application bootstrap
 ├─ model-display-names.txt        # Display name formatting rules (copied to output)
