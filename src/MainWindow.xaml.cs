@@ -12,7 +12,7 @@ public partial class MainWindow : Window
 {
     private static readonly TimeSpan SaveDebounceDelay = TimeSpan.FromMilliseconds(500);
 
-    private WidgetSettings _settings = new();
+    private Settings _settings = new();
     private readonly DispatcherTimer _saveDebounce;
 
     private System.Windows.Point? _dragStartPosition;
@@ -64,7 +64,7 @@ public partial class MainWindow : Window
         base.OnClosing(e);
     }
 
-    public WidgetSettings Settings
+    public Settings Settings
     {
         get => _settings;
         set
@@ -75,7 +75,7 @@ public partial class MainWindow : Window
     }
 
     public event EventHandler? SettingsChanged;
-    public WidgetViewModel ViewModel => (WidgetViewModel)DataContext;
+    public MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext;
 
     private void ApplySettingsToVisuals()
     {

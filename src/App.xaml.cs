@@ -10,10 +10,10 @@ namespace OpenCodeCostMeter;
 
 public partial class App : System.Windows.Application
 {
-    private WidgetSettings _settings = new();
+    private Settings _settings = new();
     private SettingsStore _store = null!;
     private UsagePoller _poller = null!;
-    private WidgetViewModel _vm = null!;
+    private MainWindowViewModel _vm = null!;
     private MainWindow _window = null!;
     private TrayIconService _trayIcon = null!;
 
@@ -52,7 +52,7 @@ public partial class App : System.Windows.Application
 
         var repo = new MessageTableRepository(dbPath);
         _poller = new UsagePoller(repo, _settings.PollIntervalSeconds);
-        _vm = new WidgetViewModel(_poller) { IsExpanded = _settings.IsExpanded };
+        _vm = new MainWindowViewModel(_poller) { IsExpanded = _settings.IsExpanded };
 
         _window = new MainWindow
         {

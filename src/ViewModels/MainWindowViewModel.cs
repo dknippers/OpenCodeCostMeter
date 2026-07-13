@@ -8,7 +8,7 @@ using System.Windows.Threading;
 
 namespace OpenCodeCostMeter.ViewModels;
 
-public partial class WidgetViewModel : ObservableObject, IDisposable
+public partial class MainWindowViewModel : ObservableObject, IDisposable
 {
     private static readonly CultureInfo EnUs = CultureInfo.GetCultureInfo("en-US");
 
@@ -16,7 +16,7 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     private readonly DispatcherTimer _highlightTimer;
     private bool _disposed;
 
-    public WidgetViewModel(UsagePoller poller)
+    public MainWindowViewModel(UsagePoller poller)
     {
         _poller = poller;
         _poller.Updated += OnUpdated;

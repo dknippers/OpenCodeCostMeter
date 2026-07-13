@@ -26,24 +26,24 @@ public sealed class SettingsStore
         return Path.Combine(dir, "OpenCodeCostMeter.settings.json");
     }
 
-    public WidgetSettings Load()
+    public Settings Load()
     {
         if (!File.Exists(_path))
-            return new WidgetSettings();
+            return new Settings();
         try
         {
             var text = File.ReadAllText(_path);
             if (string.IsNullOrWhiteSpace(text))
-                return new WidgetSettings();
-            return JsonSerializer.Deserialize<WidgetSettings>(text, JsonOpts) ?? new WidgetSettings();
+                return new Settings();
+            return JsonSerializer.Deserialize<Settings>(text, JsonOpts) ?? new Settings();
         }
         catch
         {
-            return new WidgetSettings();
+            return new Settings();
         }
     }
 
-    public void Save(WidgetSettings settings)
+    public void Save(Settings settings)
     {
         try
         {

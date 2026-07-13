@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace OpenCodeCostMeter.Models;
 
-public sealed class WidgetSettings
+public sealed class Settings
 {
     [JsonPropertyName("x")] public double X { get; set; } = double.NaN;
     [JsonPropertyName("y")] public double Y { get; set; } = double.NaN;

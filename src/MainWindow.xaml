@@ -14,7 +14,7 @@
         ShowInTaskbar="False"
         Topmost="True"
         ResizeMode="NoResize"
-        d:DataContext="{d:DesignInstance Type=vm:WidgetViewModel}">
+        d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}">
     <Window.Resources>
         <SolidColorBrush x:Key="MicaBg" Color="#20201F"/>
         <SolidColorBrush x:Key="MicaStroke" Color="#4A4A4A"/>
