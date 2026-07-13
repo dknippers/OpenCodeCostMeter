@@ -46,28 +46,26 @@ ORDER BY SUM(cost) DESC, modelID ASC;";
     public DayUsageSnapshot GetToday(long startOfTodayMs)
     {
         double costUsd = 0;
-        List<ModelBreakdown> breakdowns = new();
+        List<ModelBreakdown> breakdowns = [];
 
         using (var conn = new SqliteConnection(_connectionString))
         {
             conn.Open();
 
-            using (var cmd = conn.CreateCommand())
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = PerModelSql;
+            cmd.Parameters.AddWithValue("@start", startOfTodayMs);
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
             {
-                cmd.CommandText = PerModelSql;
-                cmd.Parameters.AddWithValue("@start", startOfTodayMs);
-                using var r = cmd.ExecuteReader();
-                while (r.Read())
-                {
-                    var mCost = GetDouble(r, 2);
+                var mCost = GetDouble(r, 2);
 
-                    costUsd += mCost;
+                costUsd += mCost;
 
-                    breakdowns.Add(new ModelBreakdown(
-                        Provider: GetString(r, 0),
-                        Model: GetString(r, 1),
-                        Cost: mCost));
-                }
+                breakdowns.Add(new ModelBreakdown(
+                    Provider: GetString(r, 0),
+                    Model: GetString(r, 1),
+                    Cost: mCost));
             }
         }
 
