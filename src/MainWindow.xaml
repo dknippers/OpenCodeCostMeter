@@ -93,10 +93,10 @@
             MouseRightButtonUp="OnCardMouseRightButtonUp">
         <Border.Style>
             <Style TargetType="Border">
-                <Setter Property="Padding" Value="16,8"/>
+                <Setter Property="Padding" Value="12,8"/>
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding IsExpanded}" Value="True">
-                        <Setter Property="Padding" Value="20,12"/>
+                        <Setter Property="Padding" Value="18,12"/>
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
@@ -109,7 +109,7 @@
             <!-- Normal content (hidden on error) -->
             <StackPanel Visibility="{Binding HasError, Converter={StaticResource BoolToCollapsed}}">
                 <!-- Primary Spend Card -->
-                <TextBlock Text="{Binding TodayCostText}" FontFamily="{StaticResource MonoFont}" FontSize="26" FontWeight="Bold"
+                <TextBlock Text="{Binding TodayCostText}" FontFamily="{StaticResource MonoFont}" FontSize="24" FontWeight="Bold"
                                Foreground="{Binding IsTodayCostHighlighted, Converter={StaticResource AmountHighlightBrush}}"
                                HorizontalAlignment="Center"/>
 
@@ -133,7 +133,7 @@
 
                 <StackPanel Visibility="{Binding HasModels, Converter={StaticResource BoolToVis}}">
                     <!-- Breakdown List -->
-                    <Border ClipToBounds="True" MaxHeight="320" Margin="0,4"
+                    <Border ClipToBounds="True" MaxHeight="320"
                             Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}">
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
                             <ScrollViewer.Resources>
