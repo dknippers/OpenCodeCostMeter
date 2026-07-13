@@ -52,7 +52,7 @@ public partial class App : System.Windows.Application
 
         var repo = new MessageTableRepository(dbPath);
         _poller = new UsagePoller(repo, _settings.PollIntervalSeconds);
-        _vm = new WidgetViewModel(_poller) { IsBreakdownExpanded = _settings.IsBreakdownExpanded };
+        _vm = new WidgetViewModel(_poller) { IsExpanded = _settings.IsExpanded };
 
         _window = new MainWindow
         {

@@ -85,9 +85,9 @@ public partial class MainWindow : Window
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(ViewModel.IsBreakdownExpanded))
+        if (e.PropertyName == nameof(ViewModel.IsExpanded))
         {
-            _settings.IsBreakdownExpanded = ViewModel.IsBreakdownExpanded;
+            _settings.IsExpanded = ViewModel.IsExpanded;
             OnSettingsChanged();
         }
     }
@@ -143,7 +143,7 @@ public partial class MainWindow : Window
     {
         if (!_isDragging)
         {
-            ViewModel.ToggleBreakdownCommand.Execute(null);
+            ViewModel.ToggleExpandCommand.Execute(null);
         }
 
         _isDragging = false;

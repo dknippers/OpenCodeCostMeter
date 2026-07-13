@@ -52,7 +52,7 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     public partial string ErrorText { get; set; } = "";
 
     [ObservableProperty]
-    public partial bool IsBreakdownExpanded { get; set; }
+    public partial bool IsExpanded { get; set; }
 
     [ObservableProperty]
     public partial bool HasModels { get; set; }
@@ -60,7 +60,7 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     public event EventHandler? FirstResultReceived;
 
     [RelayCommand]
-    private void ToggleBreakdown() => IsBreakdownExpanded = !IsBreakdownExpanded;
+    private void ToggleExpand() => IsExpanded = !IsExpanded;
 
     private string _lastCostText = "$0.00";
     private bool _isFirstUpdate = true;
