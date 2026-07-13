@@ -46,10 +46,10 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     public partial bool IsTodayCostHighlighted { get; set; }
 
     [ObservableProperty]
-    public partial bool IsRetrying { get; set; }
+    public partial bool HasError { get; set; }
 
     [ObservableProperty]
-    public partial string LastErrorText { get; set; } = "";
+    public partial string ErrorText { get; set; } = "";
 
     [ObservableProperty]
     public partial bool IsBreakdownExpanded { get; set; }
@@ -174,8 +174,8 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
         _lastModelCostTexts = nextCostTexts;
 
         HasModels = ModelRows.Count > 0;
-        IsRetrying = false;
-        LastErrorText = string.Empty;
+        HasError = false;
+        ErrorText = string.Empty;
     }
 
     private static string ModelKey(ModelBreakdown b)
@@ -188,10 +188,8 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
             _isFirstUpdate = false;
             FirstResultReceived?.Invoke(this, EventArgs.Empty);
         }
-        IsRetrying = true;
-        LastErrorText = ex is Microsoft.Data.Sqlite.SqliteException
-            ? "db locked"
-            : ex.GetType().Name;
+        HasError = true;
+        ErrorText = ex.Message;
     }
 
     public void Detach()
