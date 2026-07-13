@@ -57,7 +57,8 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial bool HasModels { get; set; }
 
-    public event EventHandler? FirstResultReceived;
+    public event EventHandler? Loaded;
+    public event EventHandler? Error;
 
     [RelayCommand]
     private void ToggleExpand() => IsExpanded = !IsExpanded;
@@ -76,20 +77,11 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
     private void OnUpdated(object? sender, DayUsageSnapshot snap)
     {
         var costText = snap.Cost.ToString("C2", EnUs);
-        bool totalChanged;
-        if (_isFirstUpdate)
-        {
-            totalChanged = false;
-            _isFirstUpdate = false;
-            FirstResultReceived?.Invoke(this, EventArgs.Empty);
-        }
-        else
-        {
-            totalChanged = costText != _lastCostText;
-        }
-        IsTodayCostHighlighted = totalChanged;
+        bool totalChanged = !_isFirstUpdate && costText != _lastCostText;
         _lastCostText = costText;
+
         TodayCostText = costText;
+        IsTodayCostHighlighted = totalChanged;
 
         var anyHighlight = totalChanged;
         var canHighlight = _lastModelCostTexts.Count > 0;
@@ -176,6 +168,12 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
         HasModels = ModelRows.Count > 0;
         HasError = false;
         ErrorText = string.Empty;
+
+        if (_isFirstUpdate)
+        {
+            _isFirstUpdate = false;
+            Loaded?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     private static string ModelKey(ModelBreakdown b)
@@ -183,13 +181,9 @@ public partial class WidgetViewModel : ObservableObject, IDisposable
 
     private void OnError(object? sender, Exception ex)
     {
-        if (_isFirstUpdate)
-        {
-            _isFirstUpdate = false;
-            FirstResultReceived?.Invoke(this, EventArgs.Empty);
-        }
         HasError = true;
         ErrorText = ex.Message;
+        Error?.Invoke(this, EventArgs.Empty);
     }
 
     public void Detach()

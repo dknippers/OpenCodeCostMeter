@@ -69,7 +69,8 @@ public partial class App : System.Windows.Application
             Shutdown();
         });
 
-        _vm.FirstResultReceived += OnFirstResultReceived;
+        _vm.Loaded += OnLoaded;
+        _vm.Error += OnError;
         _vm.Start();
     }
 
@@ -91,11 +92,28 @@ public partial class App : System.Windows.Application
         _window.Opacity = Math.Clamp(_settings.Opacity, 0.05, 1.0);
     }
 
-    private void OnFirstResultReceived(object? sender, EventArgs e)
+    private void ShowWindow()
     {
-        _vm.FirstResultReceived -= OnFirstResultReceived;
+        if (_window.IsVisible)
+        {
+            // Already visible
+            return;
+        }
+
         _window.Show();
         _window.SnapToEdgeIfOutOfBounds();
+    }
+
+    private void OnLoaded(object? sender, EventArgs e)
+    {
+        _vm.Loaded -= OnLoaded;
+        ShowWindow();
+    }
+
+    private void OnError(object? sender, EventArgs e)
+    {
+        _vm.Error -= OnError;
+        ShowWindow();
     }
 
     private void OnSettingsChanged(object? sender, EventArgs e)
