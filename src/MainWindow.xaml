@@ -110,6 +110,24 @@
                            Foreground="{Binding IsTodayCostHighlighted, Converter={StaticResource AmountHighlightBrush}}"
                            HorizontalAlignment="Center"/>
 
+            <TextBlock Text="no usage yet" FontFamily="{StaticResource MonoFont}" FontSize="14"
+                       Foreground="{StaticResource OnSurfaceVariant}" HorizontalAlignment="Center" Margin="0,12,0,4">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsBreakdownExpanded}" Value="True"/>
+                                    <Condition Binding="{Binding HasModels}" Value="False"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
             <StackPanel Visibility="{Binding HasModels, Converter={StaticResource BoolToVis}}">
                 <!-- Breakdown List -->
                 <Border ClipToBounds="True" MaxHeight="320" Margin="0,4"
