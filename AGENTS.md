@@ -40,14 +40,14 @@ Key details about the schema:
 
 ### ViewModels (`ViewModels/`)
 
-- **WidgetViewModel** - Main VM; binds to the UI, tracks cost deltas for highlighting, manages ModelRows collection
+- **WidgetViewModel** - Main VM; binds to the UI, tracks cost deltas for highlighting, manages ModelRows collection, exposes `IsExpanded` for breakdown visibility
 - **ModelRowViewModel** - One per breakdown row in the details section
 
 ### Models (`Models/`)
 
 - **DayUsageSnapshot** - Today's aggregated data (`DayKey`, cost, per-model breakdown, taken-at timestamp)
 - **ModelBreakdown** - Per-model cost
-- **WidgetSettings** - Persisted JSON settings (window position, opacity, poll interval, always-on-top)
+- **WidgetSettings** - Persisted JSON settings (window position, opacity, poll interval, always-on-top, is-expanded)
 
 ## Key Design Decisions
 
@@ -85,7 +85,7 @@ uv run --python 3.12 src/Assets/generate-icon.py
 
 ## Settings
 
-Settings file: `OpenCodeCostMeter.settings.json` next to the exe. Delete to reset defaults.
+Settings file: `OpenCodeCostMeter.settings.json` next to the exe. Delete to reset defaults. Includes window position, opacity, poll interval, always-on-top, and whether the model breakdown list is expanded.
 
 ## Model Display Names
 
