@@ -48,6 +48,9 @@ public partial class MainWindow : Window
             _saveDebounce.Stop();
             SettingsChanged?.Invoke(this, EventArgs.Empty);
         };
+
+        Loaded += (_, _) => ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+        Closing += (_, _) => ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
     }
 
     protected override void OnClosing(CancelEventArgs e)
@@ -78,6 +81,15 @@ public partial class MainWindow : Window
     {
         Topmost = _settings.AlwaysOnTop;
         Opacity = Math.Clamp(_settings.Opacity, 0.05, 1.0);
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.IsBreakdownExpanded))
+        {
+            _settings.IsBreakdownExpanded = ViewModel.IsBreakdownExpanded;
+            OnSettingsChanged();
+        }
     }
 
     private void OnSettingsChanged()
