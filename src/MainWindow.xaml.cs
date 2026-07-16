@@ -51,6 +51,7 @@ public partial class MainWindow : Window
 
         Loaded += (_, _) => ViewModel.PropertyChanged += OnViewModelPropertyChanged;
         Closing += (_, _) => ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        KeyDown += OnKeyDown;
     }
 
     protected override void OnClosing(CancelEventArgs e)
@@ -324,6 +325,34 @@ public partial class MainWindow : Window
         return flags;
     }
 
+    private void OnKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key == Key.H)
+        {
+            _previousResizeAnchor = null;
+            CenterHorizontally();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.V)
+        {
+            _previousResizeAnchor = null;
+            CenterVertically();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.A)
+        {
+            _settings.AlwaysOnTop = !_settings.AlwaysOnTop;
+            Topmost = _settings.AlwaysOnTop;
+            OnSettingsChanged();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.T)
+        {
+            ViewModel.ToggleExpandCommand.Execute(null);
+            e.Handled = true;
+        }
+    }
+
     private void OnCardMouseRightButtonUp(object sender, MouseButtonEventArgs e)
     {
         var menu = BuildMenu();
@@ -341,6 +370,7 @@ public partial class MainWindow : Window
         var onTop = new System.Windows.Controls.MenuItem
         {
             Header = "Always on top",
+            InputGestureText = "A",
             IsCheckable = true,
             IsChecked = _settings.AlwaysOnTop,
             Style = itemStyle
@@ -420,7 +450,7 @@ public partial class MainWindow : Window
         opacitySliderItem.Header = opacityPanel;
         menu.Items.Add(opacitySliderItem);
 
-        var centerHorizItem = new System.Windows.Controls.MenuItem { Header = "Center horizontally", Style = itemStyle };
+        var centerHorizItem = new System.Windows.Controls.MenuItem { Header = "Center horizontally", InputGestureText = "H", Style = itemStyle };
         centerHorizItem.Click += (_, _) =>
         {
             _previousResizeAnchor = null;
@@ -428,7 +458,7 @@ public partial class MainWindow : Window
         };
         menu.Items.Add(centerHorizItem);
 
-        var centerVertItem = new System.Windows.Controls.MenuItem { Header = "Center vertically", Style = itemStyle };
+        var centerVertItem = new System.Windows.Controls.MenuItem { Header = "Center vertically", InputGestureText = "V", Style = itemStyle };
         centerVertItem.Click += (_, _) =>
         {
             _previousResizeAnchor = null;

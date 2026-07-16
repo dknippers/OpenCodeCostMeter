@@ -45,13 +45,27 @@
                             <Border x:Name="Bd" Background="Transparent" CornerRadius="0" Padding="{TemplateBinding Padding}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="14"/>
+                                        <ColumnDefinition Width="12"/>
                                         <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock x:Name="Check" Grid.Column="0" Text="&#x25CF;" FontSize="12" FontWeight="Bold"
                                                Foreground="{StaticResource Secondary}" VerticalAlignment="Center" TextAlignment="Center"
                                                Visibility="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BoolToVis}}"/>
                                     <ContentPresenter Grid.Column="1" ContentSource="Header" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                    <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="0,0,16,0"
+                                               Foreground="{StaticResource OnSurfaceVariant}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding InputGestureText, RelativeSource={RelativeSource AncestorType=MenuItem}}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding InputGestureText, RelativeSource={RelativeSource AncestorType=MenuItem}}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </Grid>
                             </Border>
                         </Grid>
