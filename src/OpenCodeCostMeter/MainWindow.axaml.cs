@@ -21,7 +21,8 @@ public partial class MainWindow : Window
     private bool _skipInitialSizeChange = true;
 
     private Point? _dragStartPosition;
-    private PointerPressedEventArgs? _pressedArgs;
+    private PixelPoint _dragStartCursorScreen;
+    private PixelPoint _dragStartWindowPos;
     private bool _isDragging;
     private ResizeAnchorFlags? _previousResizeAnchor;
     private bool _syncingFlyout;
@@ -239,32 +240,35 @@ public partial class MainWindow : Window
         if (!point.Properties.IsLeftButtonPressed) return;
 
         _dragStartPosition = point.Position;
-        _pressedArgs = e;
         e.Pointer.Capture(CardBorder);
         e.Handled = true;
     }
 
     private void OnCardPointerMoved(object? sender, PointerEventArgs e)
     {
-        if (_isDragging || _dragStartPosition is null || _pressedArgs is null) return;
+        if (_dragStartPosition is null) return;
 
         var point = e.GetCurrentPoint(this);
         if (!point.Properties.IsLeftButtonPressed) return;
 
-        var dx = Math.Abs(point.Position.X - _dragStartPosition.Value.X);
-        var dy = Math.Abs(point.Position.Y - _dragStartPosition.Value.Y);
-        if (dx <= DragThreshold && dy <= DragThreshold) return;
+        if (!_isDragging)
+        {
+            var dx = Math.Abs(point.Position.X - _dragStartPosition.Value.X);
+            var dy = Math.Abs(point.Position.Y - _dragStartPosition.Value.Y);
+            if (dx <= DragThreshold && dy <= DragThreshold) return;
 
-        _isDragging = true;
-        _previousResizeAnchor = null;
-        e.Pointer.Capture(null);
-        // BeginMoveDrag does not block on Win32: it posts the modal WM_SYSCOMMAND
-        // move loop to the dispatcher and returns immediately. _isDragging must
-        // therefore stay set until OnCardPointerReleased, which Avalonia reaches
-        // via the WM_LBUTTONUP it synthesizes when the move loop ends.
-        BeginMoveDrag(_pressedArgs);
-        _dragStartPosition = null;
-        _pressedArgs = null;
+            _isDragging = true;
+            _previousResizeAnchor = null;
+            _dragStartCursorScreen = this.PointToScreen(_dragStartPosition.Value);
+            _dragStartWindowPos = Position;
+        }
+
+        // Move the window so the original grab point remains under the cursor.
+        // Working in physical pixels prevents rounding drift across drag events.
+        var cursor = this.PointToScreen(point.Position);
+        Position = new PixelPoint(
+            _dragStartWindowPos.X + cursor.X - _dragStartCursorScreen.X,
+            _dragStartWindowPos.Y + cursor.Y - _dragStartCursorScreen.Y);
     }
 
     private void OnCardPointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -275,7 +279,6 @@ public partial class MainWindow : Window
 
         _isDragging = false;
         _dragStartPosition = null;
-        _pressedArgs = null;
         e.Pointer.Capture(null);
 
         if (wasDragging)
