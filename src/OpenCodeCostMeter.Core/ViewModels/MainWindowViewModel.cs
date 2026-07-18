@@ -1,10 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OpenCodeCostMeter.Models;
+using OpenCodeCostMeter.Platform;
 using OpenCodeCostMeter.Services;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Windows.Threading;
 
 namespace OpenCodeCostMeter.ViewModels;
 
@@ -13,19 +13,17 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private static readonly CultureInfo EnUs = CultureInfo.GetCultureInfo("en-US");
 
     private readonly UsagePoller _poller;
-    private readonly DispatcherTimer _highlightTimer;
+    private readonly IUiTimer _highlightTimer;
     private bool _disposed;
 
-    public MainWindowViewModel(UsagePoller poller)
+    public MainWindowViewModel(UsagePoller poller, IUiTimer highlightTimer)
     {
         _poller = poller;
         _poller.Updated += OnUpdated;
         _poller.Error += OnError;
 
-        _highlightTimer = new DispatcherTimer(DispatcherPriority.Background)
-        {
-            Interval = TimeSpan.FromSeconds(2.0)
-        };
+        _highlightTimer = highlightTimer;
+        _highlightTimer.Interval = TimeSpan.FromSeconds(2.0);
         _highlightTimer.Tick += OnHighlightTimerTick;
     }
 
@@ -52,10 +50,15 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     public partial string ErrorText { get; set; } = "";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowNoUsageHint))]
     public partial bool IsExpanded { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowNoUsageHint))]
     public partial bool HasModels { get; set; }
+
+    /// <summary>True when the breakdown is expanded but there is nothing to show yet.</summary>
+    public bool ShowNoUsageHint => IsExpanded && !HasModels;
 
     public event EventHandler? Loaded;
     public event EventHandler? Error;

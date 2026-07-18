@@ -1,3 +1,4 @@
 <Solution>
-  <Project Path="src/OpenCodeCostMeter.csproj" />
+  <Project Path="src/OpenCodeCostMeter.Core/OpenCodeCostMeter.Core.csproj" />
+  <Project Path="src/OpenCodeCostMeter/OpenCodeCostMeter.csproj" />
 </Solution>

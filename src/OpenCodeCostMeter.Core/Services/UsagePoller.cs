@@ -1,24 +1,22 @@
 using OpenCodeCostMeter.Data;
 using OpenCodeCostMeter.Models;
-using System.Windows.Threading;
+using OpenCodeCostMeter.Platform;
 
 namespace OpenCodeCostMeter.Services;
 
 public sealed class UsagePoller : IDisposable
 {
     private readonly IUsageRepository _repo;
-    private readonly DispatcherTimer _timer;
+    private readonly IUiTimer _timer;
     private bool _running;
     private bool _disposed;
     private bool _inFlight;
 
-    public UsagePoller(IUsageRepository repo, double intervalSeconds)
+    public UsagePoller(IUsageRepository repo, double intervalSeconds, IUiTimer timer)
     {
         _repo = repo;
-        _timer = new DispatcherTimer(DispatcherPriority.Background)
-        {
-            Interval = TimeSpan.FromSeconds(Math.Max(0.25, intervalSeconds))
-        };
+        _timer = timer;
+        _timer.Interval = TimeSpan.FromSeconds(Math.Max(0.25, intervalSeconds));
         _timer.Tick += OnTick;
     }
 

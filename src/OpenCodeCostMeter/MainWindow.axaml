@@ -1,0 +1,230 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="OpenCodeCostMeter.MainWindow"
+        Title="OpenCode Cost Meter"
+        SizeToContent="WidthAndHeight"
+        SystemDecorations="None"
+        TransparencyLevelHint="Transparent"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True"
+        CanResize="False"
+        Icon="avares://OpenCodeCostMeter/Assets/icon.ico">
+
+  <Window.Resources>
+    <SolidColorBrush x:Key="MicaBg" Color="#20201F"/>
+    <SolidColorBrush x:Key="MicaStroke" Color="#4A4A4A"/>
+    <SolidColorBrush x:Key="OnSurface" Color="#E5E2E1"/>
+    <SolidColorBrush x:Key="OnSurfaceVariant" Color="#ADABAA"/>
+    <SolidColorBrush x:Key="Secondary" Color="#61DBB4"/>
+    <SolidColorBrush x:Key="RowHover" Color="#2A2A2A"/>
+    <FontFamily x:Key="UiFont">fonts:Inter#Inter</FontFamily>
+    <FontFamily x:Key="MonoFont">fonts:CascadiaCode#Cascadia Code</FontFamily>
+  </Window.Resources>
+
+  <Window.Styles>
+    <!-- Card padding: compact collapsed, roomier expanded -->
+    <Style Selector="Border.card">
+      <Setter Property="Padding" Value="12,8"/>
+    </Style>
+    <Style Selector="Border.card.expanded">
+      <Setter Property="Padding" Value="18,12"/>
+    </Style>
+
+    <!-- Cost-delta highlight coloring -->
+    <Style Selector="TextBlock.total">
+      <Setter Property="Foreground" Value="{StaticResource OnSurface}"/>
+    </Style>
+    <Style Selector="TextBlock.total.highlight">
+      <Setter Property="Foreground" Value="{StaticResource Secondary}"/>
+    </Style>
+    <Style Selector="TextBlock.rowcost">
+      <Setter Property="Foreground" Value="{StaticResource OnSurfaceVariant}"/>
+    </Style>
+    <Style Selector="TextBlock.rowcost.highlight">
+      <Setter Property="Foreground" Value="{StaticResource Secondary}"/>
+    </Style>
+
+    <!-- Breakdown row hover -->
+    <Style Selector="Border.row">
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+
+    <!-- Thin minimal vertical scrollbar -->
+    <Style Selector="ScrollViewer.breakdown ScrollBar">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Margin" Value="16,10,0,2"/>
+    </Style>
+    <Style Selector="ScrollViewer.breakdown ScrollBar:vertical">
+      <Setter Property="Width" Value="5"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Track IsDirectionReversed="True"
+                 Maximum="{TemplateBinding Maximum}"
+                 Minimum="{TemplateBinding Minimum}"
+                 Orientation="{TemplateBinding Orientation}"
+                 ViewportSize="{TemplateBinding ViewportSize}"
+                 Value="{TemplateBinding Value, Mode=TwoWay}">
+            <Thumb>
+              <Thumb.Template>
+                <ControlTemplate>
+                  <Border Background="{StaticResource OnSurface}" CornerRadius="2"/>
+                </ControlTemplate>
+              </Thumb.Template>
+            </Thumb>
+          </Track>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+
+    <!-- Flyout (settings menu) chrome -->
+    <Style Selector="FlyoutPresenter">
+      <Setter Property="Background" Value="{StaticResource MicaBg}"/>
+      <Setter Property="BorderBrush" Value="{StaticResource MicaStroke}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="Padding" Value="6"/>
+      <Setter Property="MinWidth" Value="220"/>
+    </Style>
+
+    <!-- Flyout text/buttons -->
+    <Style Selector="TextBlock.menuheader">
+      <Setter Property="Foreground" Value="{StaticResource OnSurfaceVariant}"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Margin" Value="4,10,0,2"/>
+    </Style>
+    <Style Selector="Button.menu">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Foreground" Value="{StaticResource OnSurface}"/>
+      <Setter Property="FontFamily" Value="{StaticResource UiFont}"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Padding" Value="4,8"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="0"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    </Style>
+    <Style Selector="Button.menu:pointerover">
+      <Setter Property="Background" Value="{StaticResource RowHover}"/>
+    </Style>
+    <Style Selector="CheckBox.menu">
+      <Setter Property="Foreground" Value="{StaticResource OnSurface}"/>
+      <Setter Property="FontFamily" Value="{StaticResource UiFont}"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Padding" Value="4,8"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    </Style>
+
+    <!-- Menu sliders: thin 4px track, filled portion in Secondary, round thumb -->
+    <Style Selector="Slider.menu">
+      <Setter Property="MinHeight" Value="20"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Grid Height="20">
+            <Track Name="PART_Track"
+                   Orientation="Horizontal"
+                   VerticalAlignment="Center"
+                   Minimum="{TemplateBinding Minimum}"
+                   Maximum="{TemplateBinding Maximum}"
+                   Value="{TemplateBinding Value, Mode=TwoWay}">
+              <Track.DecreaseButton>
+                <RepeatButton Name="PART_DecreaseButton" Focusable="False">
+                  <RepeatButton.Template>
+                    <ControlTemplate>
+                      <Border Height="4" CornerRadius="2" VerticalAlignment="Center"
+                              Background="{StaticResource Secondary}"/>
+                    </ControlTemplate>
+                  </RepeatButton.Template>
+                </RepeatButton>
+              </Track.DecreaseButton>
+              <Track.IncreaseButton>
+                <RepeatButton Name="PART_IncreaseButton" Focusable="False">
+                  <RepeatButton.Template>
+                    <ControlTemplate>
+                      <Border Height="4" CornerRadius="2" VerticalAlignment="Center"
+                              Background="{StaticResource MicaStroke}"/>
+                    </ControlTemplate>
+                  </RepeatButton.Template>
+                </RepeatButton>
+              </Track.IncreaseButton>
+              <Thumb Name="thumb" Width="12" Height="12">
+                <Thumb.Template>
+                  <ControlTemplate>
+                    <Ellipse Fill="{StaticResource OnSurface}" Stroke="{StaticResource MicaStroke}" StrokeThickness="1"/>
+                  </ControlTemplate>
+                </Thumb.Template>
+              </Thumb>
+            </Track>
+          </Grid>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+  </Window.Styles>
+
+  <Border x:Name="CardBorder"
+          Classes="card"
+          Classes.expanded="{Binding IsExpanded}"
+          CornerRadius="4"
+          Background="{StaticResource MicaBg}"
+          BorderBrush="{StaticResource MicaStroke}"
+          BorderThickness="1">
+
+    <StackPanel>
+      <!-- Normal content (hidden on error) -->
+      <StackPanel IsVisible="{Binding !HasError}">
+        <!-- Primary Spend Card -->
+        <TextBlock Classes="total"
+                   Classes.highlight="{Binding IsTodayCostHighlighted}"
+                   Text="{Binding TodayCostText}"
+                   FontFamily="{StaticResource MonoFont}" FontSize="24" FontWeight="Bold"
+                   HorizontalAlignment="Center"/>
+
+        <TextBlock Text="no usage yet"
+                   IsVisible="{Binding ShowNoUsageHint}"
+                   FontFamily="{StaticResource MonoFont}" FontSize="13"
+                   Foreground="{StaticResource OnSurfaceVariant}"
+                   HorizontalAlignment="Center" Margin="0,12,0,4"/>
+
+        <StackPanel IsVisible="{Binding HasModels}">
+          <!-- Breakdown List -->
+          <Border ClipToBounds="True" MaxHeight="320" IsVisible="{Binding IsExpanded}">
+            <ScrollViewer Classes="breakdown" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+              <ItemsControl ItemsSource="{Binding ModelRows}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border Classes="row" Margin="0,12,0,0">
+                      <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Text="{Binding Header}"
+                                   FontFamily="{StaticResource MonoFont}" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="{StaticResource OnSurface}"
+                                   VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Grid.Column="1"
+                                   Classes="rowcost"
+                                   Classes.highlight="{Binding IsCostHighlighted}"
+                                   Text="{Binding CostText}"
+                                   FontFamily="{StaticResource MonoFont}" FontSize="13" FontWeight="SemiBold"
+                                   VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="16,0,0,0"/>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </Border>
+        </StackPanel>
+      </StackPanel>
+
+      <!-- Error text (shown only on error) -->
+      <StackPanel IsVisible="{Binding HasError}">
+        <TextBlock Text="{Binding ErrorText}"
+                   FontFamily="{StaticResource MonoFont}" FontSize="14" Foreground="#E0B341"
+                   MaxWidth="360" TextWrapping="Wrap"/>
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</Window>
