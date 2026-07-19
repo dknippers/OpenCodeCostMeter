@@ -11,7 +11,7 @@ The UI is built with Avalonia UI v12 (ported from WPF) and the codebase is platf
 - **.NET 10** (plain `net10.0` for both projects — **no** `-windows` TFM)
 - **Avalonia UI** 12.1.0 (`Avalonia.Desktop`, `Avalonia.Themes.Simple`) - cross-platform UI
 - **Avalonia.Fonts.Inter** 12.1.0 + **Fonts.Avalonia.CascadiaCode** 0.14.0 - embedded fonts (no system-font dependencies)
-- **Compiled bindings disabled** (`AvaloniaUseCompiledBindingsByDefault=false`) - Avalonia 12 enables them by default; the XAML has no `x:DataType`, so v11-style reflection bindings are kept. Adding `x:DataType` and opting in is a possible follow-up.
+- **Compiled bindings enabled** (Avalonia 12 default) - `MainWindow.axaml` declares `x:DataType` for its `MainWindowViewModel` and its `ModelRowViewModel` item template.
 - **CommunityToolkit.Mvvm** 8.4.2 - MVVM framework
 - **Microsoft.Data.Sqlite** 10.0.9 - SQLite access
 - **SQLitePCLRaw.lib.e_sqlite3** 2.1.11 - native SQLite

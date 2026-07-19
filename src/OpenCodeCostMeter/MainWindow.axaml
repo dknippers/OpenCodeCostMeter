@@ -1,6 +1,8 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:viewModels="using:OpenCodeCostMeter.ViewModels"
         x:Class="OpenCodeCostMeter.MainWindow"
+        x:DataType="viewModels:MainWindowViewModel"
         Title="OpenCode Cost Meter"
         SizeToContent="WidthAndHeight"
         WindowDecorations="None"
@@ -187,7 +189,7 @@
             <ScrollViewer Classes="breakdown" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
               <ItemsControl ItemsSource="{Binding ModelRows}">
                 <ItemsControl.ItemTemplate>
-                  <DataTemplate>
+                  <DataTemplate x:DataType="viewModels:ModelRowViewModel">
                     <Border Classes="row" Margin="0,12,0,0">
                       <Grid ColumnDefinitions="*,Auto">
                         <TextBlock Grid.Column="0" Text="{Binding Header}"

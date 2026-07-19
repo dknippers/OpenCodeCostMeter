@@ -10,9 +10,6 @@
     <AssemblyProduct>OpenCode Cost Meter</AssemblyProduct>
     <NoWarn>$(NoWarn);NU1903</NoWarn>
     <DebugType>embedded</DebugType>
-    <!-- Avalonia 12 enables compiled bindings by default; keep v11 reflection
-         behavior since no x:DataType is set anywhere. -->
-    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
   <ItemGroup>

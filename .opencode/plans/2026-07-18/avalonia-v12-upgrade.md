@@ -12,7 +12,7 @@ Verified against the local clones (v11 = 11.3.18, v12 = 12.1.0 per `build/Shared
 |---|---|---|---|
 | 1 | `SystemDecorations` enum removed → `WindowDecorations`; `Window.SystemDecorations` kept as `[Obsolete]` shim | `MainWindow.axaml` line 6 `SystemDecorations="None"` (would compile with an obsolete warning) | Rename to `WindowDecorations="None"` — the only XAML edit |
 | 2 | `Avalonia.Diagnostics` package **removed**; replacement is the paid Avalonia Plus Dev Tools (`AvaloniaUI.DiagnosticsSupport`) | csproj has a Debug-only ref, but `AttachDevTools` is never called anywhere (rg-verified) — template leftover | Delete the package reference, no replacement |
-| 3 | Compiled bindings now on by default (`AvaloniaUseCompiledBindingsByDefault=true`) | All bindings in `MainWindow.axaml` are plain `{Binding}` with no `x:DataType` anywhere | Set `<AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>` in the app csproj to keep exact v11 reflection behavior. Adding `x:DataType` + opting in is an optional follow-up, not this task |
+| 3 | Compiled bindings now on by default (`AvaloniaUseCompiledBindingsByDefault=true`) | `MainWindow.axaml` needs statically typed binding contexts for the window and model-row template | Keep the Avalonia 12 default; declare `x:DataType="viewModels:MainWindowViewModel"` on the window and `x:DataType="viewModels:ModelRowViewModel"` on the `DataTemplate` |
 | 4 | `DispatcherTimer`/`AvaloniaSynchronizationContext` bind to the *current* dispatcher instead of the UI-thread dispatcher | None — every timer is constructed on the UI thread (`MainWindow` ctor debounce timer, `AvaloniaUiTimer` instances in `App.OnFrameworkInitializationCompleted`) | None. Keep the rule: never construct `AvaloniaUiTimer` off the UI thread |
 | 5 | `Fonts.Avalonia.CascadiaCode` has no v12 build (still 0.14.0, compiled against Avalonia 11.0.11) | Runtime risk if the APIs it calls broke in v12 | Verified compatible: its DLL references only `AppBuilder.ConfigureFonts`, `FontManager.AddFontCollection`, `EmbeddedFontCollection(Uri,Uri)`, and `IFontCollection` — all present and signature-compatible in v12 (v12's own `Avalonia.Fonts.Inter` uses the identical pattern). Keep 0.14.0; smoke-test font rendering; fallback in step 5 |
 | 6 | Text stack rework: own font parser, HarfBuzz shaping; `UsePlatformDetect()` now registers HarfBuzz automatically | Should be transparent | None; visual check that Inter/Cascadia render correctly |
@@ -43,9 +43,9 @@ Verified against the local clones (v11 = 11.3.18, v12 = 12.1.0 per `build/Shared
    - `Avalonia.Fonts.Inter` 11.3.18 → **12.1.0**
    - Delete the `Avalonia.Diagnostics` reference (package removed in v12; unused here).
    - Keep `Fonts.Avalonia.CascadiaCode` 0.14.0 (verified compatible; step 4 proves it).
-   - Add `<AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>` to the `PropertyGroup`.
+   - Do not set `AvaloniaUseCompiledBindingsByDefault`; retain Avalonia 12's compiled-binding default.
    - Core project: no changes.
-2. **XAML** (`src/OpenCodeCostMeter/MainWindow.axaml`): `SystemDecorations="None"` → `WindowDecorations="None"`. No other edits.
+2. **XAML** (`src/OpenCodeCostMeter/MainWindow.axaml`): `SystemDecorations="None"` → `WindowDecorations="None"`; add the `OpenCodeCostMeter.ViewModels` namespace and typed contexts for the window (`MainWindowViewModel`) and item template (`ModelRowViewModel`).
 3. **Build**: `dotnet msbuild /t:Compile` — expect zero errors; any obsolete-API warning means a missed call site, fix it.
 4. **Manual smoke test (Windows)** — same checklist as the port plan:
    - Startup shows today's cost + breakdown; **mono font is Cascadia Code and UI font is Inter** (proves the 0.14.0 font package works against v12).
@@ -55,17 +55,17 @@ Verified against the local clones (v11 = 11.3.18, v12 = 12.1.0 per `build/Shared
    - Cost-delta highlighting, error state (bogus `--db-path`), `--help` output.
    - Repeat at 100% and 150% DPI (v12 reworked window internals; the pixel/DIP math must still hold).
 5. **Fallback only if Cascadia Code fails to render**: vendor the font — embed the Cascadia Code TTFs as `AvaloniaResource` and add a `CascadiaCodeFontCollection : EmbeddedFontCollection` + `WithCascadiaCodeFont()` extension copied from `D:\code\Avalonia-v12\src\Avalonia.Fonts.Inter` (~30 lines), then drop the 0.14.0 package.
-6. **Docs + commit**: update `AGENTS.md` Tech Stack (Avalonia 12.1.0, compiled-bindings opt-out, Diagnostics removal) and commit the plan together with the implementation.
+6. **Docs + commit**: update `AGENTS.md` Tech Stack (Avalonia 12.1.0, compiled bindings, Diagnostics removal) and commit the plan together with the implementation.
 
 ## Out of scope
 
-- Enabling compiled bindings / adding `x:DataType` (optional follow-up).
 - Avalonia Plus Dev Tools (paid replacement for `Avalonia.Diagnostics`).
 - macOS packaging follow-ups from the port plan (unchanged).
 
 ## Acceptance criteria
 
 - [ ] Clean build on `net10.0`; no 11.x Avalonia packages remain (`rg "11\.3\.18" src` hits nothing); no obsolete-API warnings.
+- [ ] Avalonia 12 compiled bindings remain enabled and the window/item-template contexts are typed with `x:DataType`.
 - [ ] No `Avalonia.Diagnostics` reference; app starts fine without it.
 - [ ] Widget renders identically to v11, with Inter + Cascadia Code embedded fonts working (confirms 0.14.0 package compatibility).
 - [ ] All port-plan behaviors still pass: quadrant anchoring, drag, snap-to-edge, Center H/V, hotkeys, flyout, tray, highlighting, error dialog, `--help`/`--db-path`.
