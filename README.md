@@ -6,16 +6,26 @@ A borderless desktop widget that shows your [opencode](https://opencode.ai) LLM 
 
 Requires Qt 6.8+ with the Widgets, SQL, and Test modules, CMake 3.25+, and a C++20 compiler.
 
+On Windows, open a **Visual Studio Developer PowerShell** and run:
+
 ```powershell
+cmake -S qt -B build/qt -DCMAKE_PREFIX_PATH="C:\Qt\6.11.1\msvc2022_64"
+cmake --build build/qt
+.\build\qt\OpenCodeCostMeter.exe
+```
+
+The widget stays hidden until its first successful database poll or error. On other platforms, replace the Qt path with the installed Qt kit:
+
+```sh
 cmake -S qt -B build/qt -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x/<kit>
 cmake --build build/qt
-./build/qt/OpenCodeCostMeter --help
+./build/qt/OpenCodeCostMeter
 ```
 
 By default the widget reads from `~/.local/share/opencode/opencode.db`. To use a different database path:
 
 ```powershell
-OpenCodeCostMeter --db-path "/path/to/opencode.db"
+.\build\qt\OpenCodeCostMeter.exe --db-path "C:\path\to\opencode.db"
 ```
 
 Settings are stored as `OpenCodeCostMeter.settings.json` in the platform application-config directory. The model display-name rules file remains next to the executable.
