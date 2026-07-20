@@ -41,7 +41,7 @@ endif()
 list(GET INTER_REGULAR 0 INTER_REGULAR_FONT)
 configure_file("${INTER_REGULAR_FONT}" "${FONT_DIR}/Inter-Regular.ttf" COPYONLY)
 
-qt_add_executable(OpenCodeCostMeter
+qt_add_executable(OpenCodeCostMeter WIN32
     src/main.cpp
     src/models.h
     src/services.h src/services.cpp
