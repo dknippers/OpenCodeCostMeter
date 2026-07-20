@@ -59,6 +59,10 @@ endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/resources/model-display-names.txt
     ${CMAKE_CURRENT_BINARY_DIR}/model-display-names.txt COPYONLY)
+add_custom_command(TARGET OpenCodeCostMeter POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources/model-display-names.txt
+        $<TARGET_FILE_DIR:OpenCodeCostMeter>/model-display-names.txt)
 
 include(GNUInstallDirs)
 install(TARGETS OpenCodeCostMeter BUNDLE DESTINATION . RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
