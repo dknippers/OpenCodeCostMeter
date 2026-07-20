@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QCloseEvent>
 #include <QContextMenuEvent>
+#include <QEnterEvent>
 #include <QGuiApplication>
 #include <QHBoxLayout>
 #include <QKeyEvent>
@@ -16,8 +17,27 @@
 #include <QStyle>
 #include <QVBoxLayout>
 #include <QWidgetAction>
+#include <functional>
 
 namespace { constexpr auto Accent = "#61DBB4"; constexpr auto Text = "#E5E2E1"; constexpr auto Muted = "#ADABAA"; }
+class MenuRow final : public QWidget {
+public:
+    MenuRow(QMenu *menu, const QString &text, const QString &shortcut, bool checked, std::function<void()> clicked)
+        : QWidget(menu), m_menu(menu), m_clicked(std::move(clicked)) {
+        setFixedSize(192, 32);
+        auto *layout = new QHBoxLayout(this); layout->setContentsMargins(4, 0, 16, 0); layout->setSpacing(4);
+        auto *indicator = new QLabel(checked ? QStringLiteral("\u2022") : QString(), this); indicator->setFixedWidth(12); indicator->setAlignment(Qt::AlignCenter); indicator->setStyleSheet(QString("color:%1;font-size:16px;font-weight:bold;").arg(Accent));
+        auto *label = new QLabel(text, this); label->setStyleSheet(QString("color:%1;font-family:Inter;font-size:12px;font-weight:500;").arg(Text));
+        auto *key = new QLabel(shortcut, this); key->setStyleSheet(QString("color:%1;font-family:Inter;font-size:12px;font-weight:500;").arg(Muted));
+        layout->addWidget(indicator); layout->addWidget(label, 1); layout->addWidget(key);
+    }
+protected:
+    void enterEvent(QEnterEvent *event) override { setStyleSheet("background:#2A2A2A;"); QWidget::enterEvent(event); }
+    void leaveEvent(QEvent *event) override { setStyleSheet("background:transparent;"); QWidget::leaveEvent(event); }
+    void mouseReleaseEvent(QMouseEvent *event) override { if (event->button() == Qt::LeftButton && rect().contains(event->position().toPoint())) { m_menu->close(); m_clicked(); } }
+private:
+    QMenu *m_menu; std::function<void()> m_clicked;
+};
 class ModelRowWidget final : public QWidget {
 public:
     ModelRowWidget(const ModelBreakdown &model, QWidget *parent) : QWidget(parent) { auto *layout = new QHBoxLayout(this); layout->setContentsMargins(0, 12, 0, 0); layout->setSpacing(16); name = new QLabel(ModelDisplayNameRules::format(model.model), this); cost = new QLabel(this); name->setStyleSheet(QString("color:%1;").arg(Text)); cost->setStyleSheet(QString("color:%1;").arg(Muted)); layout->addWidget(name, 1); layout->addWidget(cost); setCost(model.cost, false); }
@@ -46,7 +66,23 @@ void WidgetWindow::mousePressEvent(QMouseEvent *event) { if (event->button() == 
 void WidgetWindow::mouseMoveEvent(QMouseEvent *event) { if (event->buttons() & Qt::LeftButton && (event->globalPosition().toPoint() - m_dragStart).manhattanLength() >= QApplication::startDragDistance()) { move(pos() + event->globalPosition().toPoint() - m_dragStart); m_dragStart = event->globalPosition().toPoint(); m_dragging = true; m_anchorPending = false; } }
 void WidgetWindow::mouseReleaseEvent(QMouseEvent *event) { if (event->button() == Qt::LeftButton) { if (!m_dragging) toggleExpanded(); else { clampToScreen(); saveSoon(); } } }
 void WidgetWindow::contextMenuEvent(QContextMenuEvent *event) { buildMenu(event->globalPos()); }
-void WidgetWindow::buildMenu(const QPoint &at) { auto *menu = new QMenu(this); auto *top = menu->addAction("Always on top"); top->setCheckable(true); top->setChecked(m_settings.alwaysOnTop); connect(top, &QAction::triggered, this, [this](bool on) { m_settings.alwaysOnTop = on; setWindowFlag(Qt::WindowStaysOnTopHint, on); show(); saveSoon(); }); menu->addSeparator(); auto addSlider = [this, menu](const QString &title, int min, int max, int value, auto changed) { auto *action = new QWidgetAction(menu); auto *host = new QWidget(menu); auto *l = new QHBoxLayout(host); auto *label = new QLabel(title, host); auto *slider = new QSlider(Qt::Horizontal, host); slider->setRange(min, max); slider->setSingleStep(5); slider->setValue(value); l->addWidget(label); l->addWidget(slider); connect(slider, &QSlider::valueChanged, this, changed); action->setDefaultWidget(host); menu->addAction(action); }; addSlider("Poll interval", 5, 60, qRound(m_settings.pollIntervalSeconds), [this](int v) { m_settings.pollIntervalSeconds = v; m_poller.setInterval(v); saveSoon(); }); addSlider("Opacity", 5, 100, qRound(m_settings.opacity * 100), [this](int v) { m_settings.opacity = v / 100.0; setWindowOpacity(m_settings.opacity); saveSoon(); }); menu->addAction("Center horizontally", [this] { center(true); }); menu->addAction("Center vertically", [this] { center(false); }); menu->addAction("Hide", this, &QWidget::hide); menu->addAction("Exit", [this] { m_exitRequested = true; qApp->quit(); }); menu->exec(at); menu->deleteLater(); }
+void WidgetWindow::buildMenu(const QPoint &at) {
+    auto *menu = new QMenu(this); menu->setStyleSheet("QMenu { background:#20201F; border:1px solid #4A4A4A; padding:0; border-radius:0; } QSlider::groove:horizontal { background:#4A4A4A; height:4px; border-radius:2px; } QSlider::sub-page:horizontal { background:#61DBB4; border-radius:2px; } QSlider::handle:horizontal { background:#E5E2E1; border:1px solid #4A4A4A; width:12px; height:12px; margin:-4px 0; border-radius:6px; }");
+    auto addWidget = [menu](QWidget *widget) { auto *action = new QWidgetAction(menu); action->setDefaultWidget(widget); menu->addAction(action); };
+    auto addRow = [this, menu, &addWidget](const QString &text, const QString &shortcut, bool checked, auto clicked) { addWidget(new MenuRow(menu, text, shortcut, checked, clicked)); };
+    auto addHeader = [menu, &addWidget](const QString &text) { auto *host = new QWidget(menu); host->setFixedSize(192, 32); auto *layout = new QHBoxLayout(host); layout->setContentsMargins(20, 0, 10, 0); auto *label = new QLabel(text, host); label->setStyleSheet(QString("color:%1;font-family:Inter;font-size:12px;font-weight:600;").arg(Text)); layout->addWidget(label); addWidget(host); };
+    auto addSlider = [this, menu, &addWidget](int min, int max, int value, const QString &suffix, auto changed) {
+        auto *host = new QWidget(menu); host->setFixedSize(192, 32); auto *layout = new QHBoxLayout(host); layout->setContentsMargins(20, 0, 10, 0); layout->setSpacing(10);
+        auto *slider = new QSlider(Qt::Horizontal, host); slider->setFixedWidth(120); slider->setRange(min, max); slider->setSingleStep(5); slider->setPageStep(5); slider->setValue(value);
+        auto *label = new QLabel(QString::number(value) + suffix, host); label->setFixedWidth(32); label->setStyleSheet(QString("color:%1;font-family:Inter;font-size:12px;font-weight:500;").arg(Text));
+        layout->addWidget(slider); layout->addWidget(label); connect(slider, &QSlider::valueChanged, this, [slider, label, suffix, changed](int v) { const int snapped = qRound(v / 5.0) * 5; if (snapped != v) { slider->setValue(snapped); return; } label->setText(QString::number(v) + suffix); changed(v); }); addWidget(host);
+    };
+    addRow("Always on top", "A", m_settings.alwaysOnTop, [this] { m_settings.alwaysOnTop = !m_settings.alwaysOnTop; setWindowFlag(Qt::WindowStaysOnTopHint, m_settings.alwaysOnTop); show(); saveSoon(); });
+    addHeader("Poll interval"); addSlider(5, 60, qRound(m_settings.pollIntervalSeconds), "s", [this](int v) { m_settings.pollIntervalSeconds = v; m_poller.setInterval(v); saveSoon(); });
+    addHeader("Opacity"); addSlider(5, 100, qRound(m_settings.opacity * 100), "%", [this](int v) { m_settings.opacity = v / 100.0; setWindowOpacity(m_settings.opacity); saveSoon(); });
+    addRow("Center horizontally", "H", false, [this] { center(true); }); addRow("Center vertically", "V", false, [this] { center(false); }); addRow("Hide", "", false, [this] { hide(); }); addRow("Exit", "", false, [this] { m_exitRequested = true; qApp->quit(); });
+    menu->exec(at); menu->deleteLater();
+}
 void WidgetWindow::closeEvent(QCloseEvent *event) { if (!m_exitRequested) { event->ignore(); hide(); } else { m_settings.x = x(); m_settings.y = y(); m_store.save(m_settings); event->accept(); } }
 void WidgetWindow::resizeEvent(QResizeEvent *event) { if (event->oldSize().isEmpty()) return; const QSize delta = event->size() - event->oldSize(); QScreen *s = QGuiApplication::screenAt(frameGeometry().center()); if (!s) return; const QPoint c = s->availableGeometry().center(); if (!m_anchorPending) { m_anchorRight = frameGeometry().center().x() > c.x(); m_anchorBottom = frameGeometry().center().y() > c.y(); m_anchorPending = true; } else { m_anchorPending = false; } move(x() - (m_anchorRight ? delta.width() : 0), y() - (m_anchorBottom ? delta.height() : 0)); }
 void WidgetWindow::keyPressEvent(QKeyEvent *event) { if (event->key() == Qt::Key_T) toggleExpanded(); else if (event->key() == Qt::Key_H) center(true); else if (event->key() == Qt::Key_V) center(false); else if (event->key() == Qt::Key_A) { m_settings.alwaysOnTop = !m_settings.alwaysOnTop; setWindowFlag(Qt::WindowStaysOnTopHint, m_settings.alwaysOnTop); show(); saveSoon(); } else QWidget::keyPressEvent(event); }
