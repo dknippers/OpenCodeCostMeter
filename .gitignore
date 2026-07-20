@@ -4,3 +4,4 @@ obj/
 *.user
 build/
 OpenCodeCostMeter.zip
+CMakeUserPresets.json
