@@ -10,7 +10,9 @@
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv); app.setApplicationName("OpenCode Cost Meter"); app.setQuitOnLastWindowClosed(false); const QIcon appIcon(":/icon.ico"); app.setWindowIcon(appIcon);
-    QFontDatabase::addApplicationFont(":/fonts/CascadiaMono.ttf");
+    QFontDatabase::addApplicationFont(":/fonts/CascadiaMono-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/fonts/CascadiaMono-SemiBold.ttf");
+    QFontDatabase::addApplicationFont(":/fonts/CascadiaMono-Bold.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Inter-Regular.ttf");
     QCommandLineParser parser; parser.setApplicationDescription("Displays today's OpenCode LLM spend."); parser.addHelpOption(); QCommandLineOption databaseOption("db-path", "Use an alternative opencode.db location.", "path"); parser.addOption(databaseOption); parser.process(app);
     const QString database = DbLocator::resolve(parser.value(databaseOption)); if (database.isEmpty()) { QMessageBox::critical(nullptr, "OpenCode Cost Meter", "Could not find the opencode database.\n\nUse --db-path <path> to specify it."); return 1; }

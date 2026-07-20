@@ -40,9 +40,9 @@ private:
 };
 class ModelRowWidget final : public QWidget {
 public:
-    ModelRowWidget(const ModelBreakdown &model, QWidget *parent) : QWidget(parent) { auto *layout = new QHBoxLayout(this); layout->setContentsMargins(0, 12, 0, 0); layout->setSpacing(16); name = new QLabel(ModelDisplayNameRules::format(model.model), this); cost = new QLabel(this); name->setStyleSheet(QString("color:%1;").arg(Text)); cost->setStyleSheet(QString("color:%1;").arg(Muted)); layout->addWidget(name, 1); layout->addWidget(cost); setCost(model.cost, false); }
-    void setCost(double value, bool highlight) { cost->setText(QLocale(QLocale::English, QLocale::UnitedStates).toCurrencyString(value, "$", 3)); cost->setStyleSheet(QString("color:%1;").arg(highlight ? Accent : Muted)); }
-    void clearHighlight() { cost->setStyleSheet(QString("color:%1;").arg(Muted)); }
+    ModelRowWidget(const ModelBreakdown &model, QWidget *parent) : QWidget(parent) { auto *layout = new QHBoxLayout(this); layout->setContentsMargins(0, 12, 0, 0); layout->setSpacing(16); name = new QLabel(ModelDisplayNameRules::format(model.model), this); cost = new QLabel(this); name->setStyleSheet(QString("color:%1;font-weight:600;").arg(Text)); cost->setStyleSheet(QString("color:%1;font-weight:600;").arg(Muted)); layout->addWidget(name, 1); layout->addWidget(cost); setCost(model.cost, false); }
+    void setCost(double value, bool highlight) { cost->setText(QLocale(QLocale::English, QLocale::UnitedStates).toCurrencyString(value, "$", 3)); cost->setStyleSheet(QString("color:%1;font-weight:600;").arg(highlight ? Accent : Muted)); }
+    void clearHighlight() { cost->setStyleSheet(QString("color:%1;font-weight:600;").arg(Muted)); }
 private: QLabel *name; QLabel *cost;
 };
 WidgetWindow::WidgetWindow(Settings &settings, SettingsStore &store, UsagePoller &poller) : m_settings(settings), m_store(store), m_poller(poller) {
