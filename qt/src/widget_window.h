@@ -32,7 +32,7 @@ private:
     void buildMenu(const QPoint &globalPosition); void updateRows(const QList<ModelBreakdown> &models);
     QString modelKey(const ModelBreakdown &model) const;
     Settings &m_settings; SettingsStore &m_store; UsagePoller &m_poller;
-    QLabel *m_total; QLabel *m_empty; QLabel *m_error; QScrollArea *m_scroll; QWidget *m_rowsHost; QVBoxLayout *m_rowsLayout;
+    QLabel *m_total; QLabel *m_empty; QLabel *m_error; QScrollArea *m_scroll; QWidget *m_rowsHost; QVBoxLayout *m_cardLayout; QVBoxLayout *m_rowsLayout;
     QHash<QString, ModelRowWidget *> m_rows; QHash<QString, QString> m_previousCosts;
     QTimer m_highlightTimer; QTimer m_saveTimer; QPoint m_dragStart; bool m_dragging = false; bool m_firstUpdate = true; bool m_exitRequested = false;
     bool m_anchorPending = false; bool m_anchorRight = false; bool m_anchorBottom = false;
