@@ -12,11 +12,16 @@ public sealed class TrayIconService : IDisposable
     {
         _mainWindow = mainWindow;
 
-        var exitItem = new Forms.ToolStripMenuItem("Exit");
-        exitItem.Click += (_, _) => exitApplication();
+        var showItem = new Forms.ToolStripMenuItem("Show");
+        showItem.Click += (_, _) => ShowWindow();
+
+        var hideItem = new Forms.ToolStripMenuItem("Hide");
+        hideItem.Click += (_, _) => _mainWindow.Hide();
 
         var menu = new Forms.ContextMenuStrip();
-        menu.Items.Add(exitItem);
+        menu.Items.Add(showItem);
+        menu.Items.Add(hideItem);
+        menu.Items.Add(new Forms.ToolStripMenuItem("Exit", null, (_, _) => exitApplication()));
 
         var icon = LoadIcon();
 
@@ -57,8 +62,17 @@ public sealed class TrayIconService : IDisposable
         }
         else
         {
-            _mainWindow.Show();
-            _mainWindow.Activate();
+            ShowWindow();
         }
+    }
+
+    private void ShowWindow()
+    {
+        if (!_mainWindow.IsVisible)
+        {
+            _mainWindow.Show();
+        }
+
+        _mainWindow.Activate();
     }
 }
