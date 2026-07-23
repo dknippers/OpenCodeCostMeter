@@ -16,5 +16,9 @@ int main(int argc, char *argv[]) {
     QFontDatabase::addApplicationFont(":/fonts/Inter-Regular.ttf");
     QCommandLineParser parser; parser.setApplicationDescription("Displays today's OpenCode LLM spend."); parser.addHelpOption(); QCommandLineOption databaseOption("db-path", "Use an alternative opencode.db location.", "path"); parser.addOption(databaseOption); parser.process(app);
     const QString database = DbLocator::resolve(parser.value(databaseOption)); if (database.isEmpty()) { QMessageBox::critical(nullptr, "OpenCode Cost Meter", "Could not find the opencode database.\n\nUse --db-path <path> to specify it."); return 1; }
-    SettingsStore store; Settings settings = store.load(); UsagePoller poller(database, settings.pollIntervalSeconds); WidgetWindow window(settings, store, poller); QSystemTrayIcon tray(appIcon, &app); QMenu menu; menu.addAction("Exit", &app, &QCoreApplication::quit); if (QSystemTrayIcon::isSystemTrayAvailable()) { tray.setToolTip("OpenCode Cost Meter"); tray.setContextMenu(&menu); QObject::connect(&tray, &QSystemTrayIcon::activated, &window, [&window](auto) { window.isVisible() ? window.hide() : window.show(); }); tray.show(); } poller.start(); const int result = app.exec(); store.save(settings); return result;
+    SettingsStore store; Settings settings = store.load(); UsagePoller poller(database, settings.pollIntervalSeconds); WidgetWindow window(settings, store, poller); QSystemTrayIcon tray(appIcon, &app); QMenu menu;
+    menu.addAction("Show", &window, [&window] { window.show(); window.activateWindow(); });
+    menu.addAction("Hide", &window, &QWidget::hide);
+    menu.addAction("Exit", &app, &QCoreApplication::quit);
+    if (QSystemTrayIcon::isSystemTrayAvailable()) { tray.setToolTip("OpenCode Cost Meter"); tray.setContextMenu(&menu); QObject::connect(&tray, &QSystemTrayIcon::activated, &window, [&window](auto) { window.isVisible() ? window.hide() : window.show(); }); tray.show(); } poller.start(); const int result = app.exec(); store.save(settings); return result;
 }
