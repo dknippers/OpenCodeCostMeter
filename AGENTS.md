@@ -18,8 +18,9 @@ The widget reads from opencode's SQLite database at `%USERPROFILE%\.local\share\
 
 Key details about the schema:
 
-- Uses the `message` table (not `session`) because `session` maintains cumulative tokens across the entire session lifetime, which would incorrectly attribute past tokens to today's date.
-- Each assistant message has a `data` JSON column containing `$.time.completed` (Unix ms timestamp), `$.cost`, `$.providerID`, and `$.modelID`.
+- Uses per-message tables (not `session`/`session_v2`) because sessions maintain cumulative tokens across the entire session lifetime, which would incorrectly attribute past tokens to today's date.
+- **v1 (legacy)** stores assistant messages in `message`, with a `data` JSON column containing `$.time.completed` (Unix ms timestamp), `$.cost`, `$.providerID`, and `$.modelID`.
+- **v2** stores every message in `session_message`, with `type = 'assistant'` and a `data` JSON column containing `$.time.completed`, `$.cost`, `$.model.providerID`, and `$.model.id`. New v2 sessions write only to `session_message`; the v1 migration backfills all legacy `message` rows into it, so `session_message` is authoritative whenever the table exists.
 - The widget filters messages by `$.time.completed` to only count today's calls.
 
 ## Architecture
@@ -28,7 +29,7 @@ Key details about the schema:
 
 - **DbLocator** - Resolves the database path (default or from the `--db-path` command-line argument)
 - **DayKey** - Static helper in `DbLocator.cs`; converts a Unix-ms timestamp to a `yyyy-MM-dd` string
-- **MessageTableRepository** - Primary repo that queries the `message` table for today's per-model cost breakdowns. Single SQL query with inner `GROUP BY (time.created, time.completed)` to deduplicate forked messages before aggregating per provider/model. Selects only `providerID`, `modelID`, and `cost`.
+- **MessageTableRepository** - Primary repo that queries today's per-model cost breakdowns from `session_message` (v2) when the table exists, otherwise from the legacy `message` table (v1). Single SQL query with inner `GROUP BY (time.created, time.completed)` to deduplicate forked messages before aggregating per provider/model. Selects only the provider, model, and cost fields. Table presence is checked each poll so a live v1-to-v2 migration is picked up without restarting.
 - **IUsageRepository** - Interface for repositories
 
 ### Services (`Services/`)
@@ -53,14 +54,15 @@ Key details about the schema:
 
 1. **Read-only SQLite** - Connection uses `SqliteOpenMode.ReadOnly` and `DefaultTimeout = 2` to survive database locks
 2. **Today only** - Tokens are attributed to the day the message _completed_, not when the session started
-3. **Non-blocking UI** - Slow queries don't freeze the UI; last known values stay on screen during refresh
-4. **Cost delta highlighting** - New spend since last poll is highlighted briefly
-5. **System tray** - The widget lives in the system tray; closing the widget hides it to the tray. **Hide** and **Exit** are available in the widget's context menu; the tray menu has **Show**, **Hide**, and **Exit**.
-6. **Settings debounce** - Slider drags (poll interval, opacity) update visuals immediately but debounce the disk write by 500ms via a `DispatcherTimer` in `MainWindow`, so `SettingsStore.Save()` fires once after the user stops dragging.
-7. **Delayed window show** - The window stays hidden until the first poll result arrives, avoiding a flash of "$0.00".
-8. **Quadrant-based resize anchoring** - When the widget resizes (e.g. expanding the breakdown list), the window anchors from the corner closest to the screen center so it expands "inward" rather than flying off-screen. The computed quadrant/span flags are cached and reused for exactly one subsequent resize, so expanding then collapsing returns the widget to its original (X,Y) even when the expanded size crosses a screen axis. The cached anchor is cleared when the window is dragged or centered. `SnapToEdgeIfOutOfBounds()` uses `WorkingArea` (excludes taskbar) rather than `Bounds`.
-9. **In-place ModelRows diff** - `WidgetViewModel` performs a minimal Move/Insert diff on the `ObservableCollection<ModelRowViewModel>` so WPF's `ItemContainerGenerator` can reuse containers instead of rebuilding the entire list each poll.
-10. **Context menu** - Right-clicking the widget shows: Always on top, Poll interval slider, Opacity slider, Center horizontally, Center vertically, Hide, Exit.
+3. **v1/v2 schema detection** - The repo prefers `session_message` when present because v2 writes new sessions only there and its migration backfills legacy rows; older databases fall back to `message`
+4. **Non-blocking UI** - Slow queries don't freeze the UI; last known values stay on screen during refresh
+5. **Cost delta highlighting** - New spend since last poll is highlighted briefly
+6. **System tray** - The widget lives in the system tray; closing the widget hides it to the tray. **Hide** and **Exit** are available in the widget's context menu; the tray menu has **Show**, **Hide**, and **Exit**.
+7. **Settings debounce** - Slider drags (poll interval, opacity) update visuals immediately but debounce the disk write by 500ms via a `DispatcherTimer` in `MainWindow`, so `SettingsStore.Save()` fires once after the user stops dragging.
+8. **Delayed window show** - The window stays hidden until the first poll result arrives, avoiding a flash of "$0.00".
+9. **Quadrant-based resize anchoring** - When the widget resizes (e.g. expanding the breakdown list), the window anchors from the corner closest to the screen center so it expands "inward" rather than flying off-screen. The computed quadrant/span flags are cached and reused for exactly one subsequent resize, so expanding then collapsing returns the widget to its original (X,Y) even when the expanded size crosses a screen axis. The cached anchor is cleared when the window is dragged or centered. `SnapToEdgeIfOutOfBounds()` uses `WorkingArea` (excludes taskbar) rather than `Bounds`.
+10. **In-place ModelRows diff** - `WidgetViewModel` performs a minimal Move/Insert diff on the `ObservableCollection<ModelRowViewModel>` so WPF's `ItemContainerGenerator` can reuse containers instead of rebuilding the entire list each poll.
+11. **Context menu** - Right-clicking the widget shows: Always on top, Poll interval slider, Opacity slider, Center horizontally, Center vertically, Hide, Exit.
 
 ## Building
 
