@@ -18,10 +18,10 @@ The widget reads from opencode's SQLite database at `%USERPROFILE%\.local\share\
 
 Key details about the schema:
 
+- **Only opencode v2 is supported.** Databases without `session_message` (the legacy v1 schema) yield an empty snapshot — the widget shows $0.00 rather than failing.
 - Uses per-message tables (not `session`/`session_v2`) because sessions maintain cumulative tokens across the entire session lifetime, which would incorrectly attribute past tokens to today's date.
-- **v1 (legacy)** stores assistant messages in `message`, with a `data` JSON column containing `$.time.completed` (Unix ms timestamp), `$.cost`, `$.providerID`, and `$.modelID`.
-- **v2** stores every message in `session_message`, with `type = 'assistant'` and a `data` JSON column containing `$.time.completed`, `$.cost`, `$.model.providerID`, and `$.model.id`. New v2 sessions write only to `session_message`; the v1 migration backfills all legacy `message` rows into it, so `session_message` is authoritative whenever the table exists.
-- The widget filters messages by `$.time.completed` to only count today's calls.
+- Messages live in `session_message`, with `type = 'assistant'` and a `data` JSON column containing `$.time.completed`, `$.cost`, `$.model.providerID`, and `$.model.id`. The v2 migration backfills legacy v1 `message` rows into `session_message`, so it is the single authoritative source. The legacy `message` table is never queried.
+- The widget filters messages by `$.time.completed` to only count today's calls, plus the indexed `time_created` column to avoid parsing historical message JSON. Because of that index filter, a request created before midnight but completed today is not counted.
 
 ## Architecture
 
@@ -29,7 +29,7 @@ Key details about the schema:
 
 - **DbLocator** - Resolves the database path (default or from the `--db-path` command-line argument)
 - **DayKey** - Static helper in `DbLocator.cs`; converts a Unix-ms timestamp to a `yyyy-MM-dd` string
-- **MessageTableRepository** - Primary repo that queries today's per-model cost breakdowns from `session_message` (v2) when the table exists, otherwise from the legacy `message` table (v1). Single SQL query with inner `GROUP BY (time.created, time.completed)` to deduplicate forked messages before aggregating per provider/model. Selects only the provider, model, and cost fields. Table presence is checked each poll so a live v1-to-v2 migration is picked up without restarting.
+- **MessageTableRepository** - Queries today's per-model cost breakdowns from `session_message`. Single SQL query with inner `GROUP BY (time.created, time.completed)` to deduplicate forked messages before aggregating per provider/model. Selects only the provider, model, and cost fields. Table presence is checked each poll so a live schema change is picked up without restarting; a missing `session_message` table yields an empty snapshot.
 - **IUsageRepository** - Interface for repositories
 
 ### Services (`Services/`)
@@ -54,7 +54,7 @@ Key details about the schema:
 
 1. **Read-only SQLite** - Connection uses `SqliteOpenMode.ReadOnly` and `DefaultTimeout = 2` to survive database locks
 2. **Today only** - Tokens are attributed to the day the message _completed_, not when the session started
-3. **v1/v2 schema detection** - The repo prefers `session_message` when present because v2 writes new sessions only there and its migration backfills legacy rows; older databases fall back to `message`
+3. **v2 only** - `session_message` is the single data source; the legacy v1 `message` table is not queried. OpenCode's v2 migration backfills legacy rows into `session_message`, and joining both tables made every poll scan the legacy table
 4. **Non-blocking UI** - Slow queries don't freeze the UI; last known values stay on screen during refresh
 5. **Cost delta highlighting** - New spend since last poll is highlighted briefly
 6. **System tray** - The widget lives in the system tray; closing the widget hides it to the tray. **Hide** and **Exit** are available in the widget's context menu; the tray menu has **Show**, **Hide**, and **Exit**.

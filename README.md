@@ -2,9 +2,13 @@
 
 A borderless Windows 11 desktop widget that shows your [opencode](https://opencode.ai) LLM spend for today in real time, broken down by model.
 
-## Usage
+## Requirements
 
-Requires .NET 10.
+- Windows 11
+- .NET 10
+- A recent opencode version that uses the v2 database schema (`session_message` table). Legacy v1 databases are not supported and will show $0.00.
+
+## Usage
 
 ```powershell
 git clone https://github.com/user/OpenCodeCostMeter.git

@@ -5,38 +5,17 @@ namespace OpenCodeCostMeter.Data;
 
 public sealed class MessageTableRepository : IUsageRepository
 {
-    // v1 stores assistant messages in `message` with flat providerID/modelID fields.
-    // v2 stores them in `session_message` (type = 'assistant') with a nested model object.
+    // Only opencode v2 is supported: every message lives in `session_message`,
+    // and assistant rows carry a nested model object in `data`.
     //
-    // Table existence says nothing about the version: late v1 builds already create
-    // `session_message` (holding only non-assistant projections such as
-    // 'model-switched'), and a fresh v2 database has no `message` table at all.
-    // So instead of detecting the version, we read both sources and merge them:
-    //  - v2 imports v1 sessions into `session_message` keeping the original message
-    //    id, so legacy rows whose id already exists in `session_message` are skipped.
-    //  - Anything else in `message` (pure v1, or v1 used after v2 on the same day)
-    //    is counted from there.
-    //
-    // The middle GROUP BY (time.created, time.completed) deduplicates forked messages
-    // across both sources — forking clones messages verbatim (same timestamps, same
-    // cost), so without this, forked sessions would double-count their history.
-    private const string LegacyRowsSql = @"
-    SELECT
-        json_extract(m.data, '$.providerID') AS providerID,
-        json_extract(m.data, '$.modelID') AS modelID,
-        json_extract(m.data, '$.cost') AS cost,
-        json_extract(m.data, '$.time.created') AS created,
-        json_extract(m.data, '$.time.completed') AS completed
-    FROM message m
-    WHERE json_extract(m.data, '$.role') = 'assistant'
-      AND json_extract(m.data, '$.time.completed') IS NOT NULL
-      AND CAST(json_extract(m.data, '$.time.completed') AS INTEGER) >= @start
-      {0}";
-
-    private const string LegacyNotInSessionMessageSql =
-        "AND NOT EXISTS (SELECT 1 FROM session_message sm WHERE sm.id = m.id)";
-
-    private const string SessionMessageRowsSql = @"
+    // The inner GROUP BY (time.created, time.completed) deduplicates forked messages,
+    // which are cloned verbatim with the same timestamps and cost.
+    private const string PerModelSql = @"
+SELECT
+    COALESCE(providerID, ''),
+    COALESCE(modelID, ''),
+    COALESCE(SUM(cost), 0)
+FROM (
     SELECT
         json_extract(data, '$.model.providerID') AS providerID,
         json_extract(data, '$.model.id') AS modelID,
@@ -45,17 +24,10 @@ public sealed class MessageTableRepository : IUsageRepository
         json_extract(data, '$.time.completed') AS completed
     FROM session_message
     WHERE type = 'assistant'
-      AND json_extract(data, '$.time.completed') IS NOT NULL
-      AND CAST(json_extract(data, '$.time.completed') AS INTEGER) >= @start";
-
-    private const string PerModelSql = @"
-SELECT
-    COALESCE(providerID, ''),
-    COALESCE(modelID, ''),
-    COALESCE(SUM(cost), 0)
-FROM (
-    SELECT providerID, modelID, cost
-    FROM ({0})
+      -- Uses the indexed row timestamp to avoid parsing historical message JSON.
+      -- A request created before midnight but completed today will not be included.
+      AND time_created >= @start
+      AND CAST(json_extract(data, '$.time.completed') AS INTEGER) >= @start
     GROUP BY created, completed
 )
 GROUP BY providerID, modelID
@@ -83,7 +55,7 @@ ORDER BY SUM(cost) DESC, modelID ASC;";
         {
             conn.Open();
 
-            var sql = BuildPerModelSql(conn);
+            var sql = SchemaIsSupported(conn) ? PerModelSql : null;
             if (sql is null)
                 return new DayUsageSnapshot(
                     DayKey: DayKey.FromStartMs(startOfTodayMs),
@@ -115,23 +87,9 @@ ORDER BY SUM(cost) DESC, modelID ASC;";
             TakenAt: DateTimeOffset.Now);
     }
 
-    // Checked on every poll rather than cached: opencode can migrate the database to v2
-    // (or drop the legacy table) while the widget is running.
-    private static string? BuildPerModelSql(SqliteConnection conn)
-    {
-        var hasLegacy = TableExists(conn, "message");
-        var hasSessionMessage = TableExists(conn, "session_message");
-
-        List<string> sources = [];
-        if (hasSessionMessage)
-            sources.Add(SessionMessageRowsSql);
-        if (hasLegacy)
-            sources.Add(string.Format(LegacyRowsSql, hasSessionMessage ? LegacyNotInSessionMessageSql : string.Empty));
-
-        return sources.Count == 0
-            ? null
-            : string.Format(PerModelSql, string.Join("\n    UNION ALL\n", sources));
-    }
+    // Checked on every poll rather than cached so a live schema change is picked up
+    // without restarting the widget.
+    private static bool SchemaIsSupported(SqliteConnection conn) => TableExists(conn, "session_message");
 
     private static bool TableExists(SqliteConnection conn, string tableName)
     {
